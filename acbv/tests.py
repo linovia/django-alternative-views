@@ -1,6 +1,7 @@
 
 # from django.test import TestCase
 from django.test import RequestFactory
+from django import http
 from unittest2 import TestCase
 from base import View, Mixin
 from mock import Mock
@@ -9,7 +10,8 @@ import copy
 
 
 class MyMixin1(Mixin):
-    pass
+    def get(self, request, *args, **kwargs):
+        return http.HttpResponse('OK')
 
 
 class MyMixin2(Mixin):
@@ -100,6 +102,15 @@ class TestView(TestCase):
     def test_method_not_allowed_if_no_mixins_can_process_it(self):
         view = MyView1()
         rf = RequestFactory()
+        request = rf.post('/')
+        response = view.dispatch(request)
+        self.assertTrue(isinstance(response, http.HttpResponseNotAllowed))
+
+    def test_method_allowed_if_one_mixin_can_process_it(self):
+        view = MyView1()
+        rf = RequestFactory()
         request = rf.get('/')
-        view.dispatch(request)
-        raise NotImplementedError('')
+        response = view.dispatch(request)
+        self.assertEqual(type(response), http.HttpResponse)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'OK')

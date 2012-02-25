@@ -1,10 +1,13 @@
 
 import copy
 
-from django.utils.decorators import classonlymethod
 from functools import update_wrapper
+from django.utils.decorators import classonlymethod
+from django import http
 from django.utils.datastructures import SortedDict
-import logging
+
+from django.utils.log import getLogger
+logger = getLogger('django.request')
 
 
 class Mixin(object):
@@ -52,14 +55,21 @@ class ViewMetaclass(type):
 
 
 class View(object):
+    """
+    Container class for the mixins. It dispatch the requests depending on what
+    mixins are able to do.
+    Huge parts are taken from django.views.generic.base.View as they have
+    similar roles.
+    """
 
     __metaclass__ = ViewMetaclass
+
+    http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
 
     def __init__(self, *args, **kwargs):
         super(View, self).__init__(*args, **kwargs)
         self.mixins = copy.deepcopy(self.base_mixins)
         self.contributed = {}
-        self.logger = logging.getLogger('acbv.View')
 
     def contribute_to_view(self, request):
         '''
@@ -101,5 +111,33 @@ class View(object):
         update_wrapper(view, cls.dispatch, assigned=())
         return view
 
-    def dispatch(self, request):
-        pass
+    def find_http_method(self, method_name):
+        method_name = method_name.lower()
+        for name, mixin in self.mixins.iteritems():
+            if hasattr(mixin, method_name):
+                return getattr(mixin, method_name)
+        return self.http_method_not_allowed
+
+    def dispatch(self, request, *args, **kwargs):
+        # Try to dispatch to the right method; if a method doesn't exist,
+        # defer to the error handler. Also defer to the error handler if the
+        # request method isn't on the approved list.
+        if request.method.lower() in self.http_method_names:
+            # TODO
+            handler = self.find_http_method(request.method)
+        else:
+            handler = self.http_method_not_allowed
+        self.request = request
+        self.args = args
+        self.kwargs = kwargs
+        return handler(request, *args, **kwargs)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        allowed_methods = [m for m in self.http_method_names if hasattr(self, m)]
+        logger.warning('Method Not Allowed (%s): %s' % (request.method, request.path),
+            extra={
+                'status_code': 405,
+                'request': self.request
+            }
+        )
+        return http.HttpResponseNotAllowed(allowed_methods)
