@@ -1,0 +1,10 @@
+Django alternative views
+========================
+
+This is work in progress and shouldn't be used yet.
+
+This package provides an alternative implementation of Django generic
+class based views.
+
+It is aimed to be much more reusable and should cover a wider set of use
+cases.
