@@ -18,11 +18,11 @@ install_requires = [
 ]
 
 setup(
-    name='acbv',
+    name='django-alternative-views',
     version='0.0.1',
     author='Xavier Ordoquy',
     author_email='xordoquy@linovia.com',
-    url='http://github.com/linovia/acbv',
+    url='https://github.com/linovia/django-alternative-views',
     description='Alternative to Django class based views.',
     long_description=__doc__,
     packages=find_packages(exclude=['tests']),
