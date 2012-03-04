@@ -31,7 +31,8 @@ def get_declared_mixins(bases, attrs):
     Create a list of mixin instances from the passed in 'attrs', plus any
     similar mixin on the base classes (in 'bases').
     """
-    mixins = [(mixin_name, attrs.pop(mixin_name)) for mixin_name, obj in attrs.items() if isinstance(obj, Mixin)]
+    mixins = [(mixin_name, attrs.pop(mixin_name))
+        for mixin_name, obj in attrs.items() if isinstance(obj, Mixin)]
     mixins.sort(key=lambda x: x[1].creation_counter)
 
     # If this class is subclassing another Form, add that Form's fields.
@@ -45,9 +46,9 @@ def get_declared_mixins(bases, attrs):
 
 
 class ViewMetaclass(type):
-    '''
+    """
     A meta class the will gather the view's mixins
-    '''
+    """
     def __new__(cls, name, bases, attrs):
         attrs['base_mixins'] = get_declared_mixins(bases, attrs)
         new_class = super(ViewMetaclass, cls).__new__(cls, name, bases, attrs)
@@ -72,10 +73,10 @@ class View(object):
         self.contributed = {}
 
     def contribute_to_view(self, request):
-        '''
+        """
         For each mixin, sets the context, calls the contribute_to_view and
         update the view context according to their return
-        '''
+        """
         for name, mixin in self.mixins.iteritems():
             for key, value in self.contributed.iteritems():
                 if hasattr(mixin, key):
@@ -134,7 +135,8 @@ class View(object):
 
     def http_method_not_allowed(self, request, *args, **kwargs):
         allowed_methods = [m for m in self.http_method_names if hasattr(self, m)]
-        logger.warning('Method Not Allowed (%s): %s' % (request.method, request.path),
+        logger.warning(
+            'Method Not Allowed (%s): %s' % (request.method, request.path),
             extra={
                 'status_code': 405,
                 'request': self.request
