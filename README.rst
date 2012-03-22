@@ -10,10 +10,10 @@ It is aimed to be much more reusable and should cover a wider set of use
 cases.
 
 
-Examples
---------
+Target
+------
 
-::
+views.py::
 
 
     class ProjectMixin(ObjectMixin):
@@ -30,3 +30,14 @@ Examples
         contact = ContactMixin()
 
     
+urls.py::
+
+
+    urlpatterns = patterns('',
+        url(r'^project/$', ProjectView.as_list(), name='projects'),
+        url(r'^project/new/$', ProjectView.as_new(), name='new-project'),
+        url(r'^project/(?P<project_id>\d+)/$', ProjectView.as_detail(), name='project'),
+        url(r'^project/(?P<project_id>\d+)/update/$', ProjectView.as_update(), name='update-project'),
+        url(r'^project/(?P<project_id>\d+)/delete/$', ProjectView.as_delete(), name='delete-project'),
+    )
+
