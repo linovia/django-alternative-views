@@ -3,14 +3,17 @@
 from django.test import RequestFactory
 from django import http
 from unittest2 import TestCase
-from base import View, Mixin
+from alternative_views.base import View
+from alternative_views.mixins import Mixin
 from mock import Mock
 import types
 import copy
 
 
 class MyMixin1(Mixin):
-    def get(self, request, *args, **kwargs):
+    allowed_methods = ['get']
+
+    def detail_get(self, request, *args, **kwargs):
         return http.HttpResponse('OK')
 
 
@@ -56,7 +59,7 @@ class TestView(TestCase):
         self.assertEqual(MySubView.base_mixins.keys(), ['mixin1', 'mixin2', 'mixin3'])
 
     def test_changing_the_instance_mixins_does_not_affect_the_class(self):
-        view = MyView1()
+        view = MyView1(mode='detail')
         self.assertEqual(view.mixins.keys(), ['mixin1', 'mixin2'])
         from django.utils.datastructures import SortedDict
         view.mixins = SortedDict()
@@ -64,7 +67,7 @@ class TestView(TestCase):
         self.assertEqual(MyView1.base_mixins.keys(), ['mixin1', 'mixin2'])
 
     def test_mixins_contribute_to_view_is_called_from_view(self):
-        view = MyView1()
+        view = MyView1(mode='detail')
         m1, m2 = Mock(), Mock()
         m1.return_value, m2.return_value = {}, {}
         view.mixins['mixin1'].contribute_to_view = m1
@@ -77,7 +80,7 @@ class TestView(TestCase):
         self.assertEqual(m2.call_count, 1)
 
     def test_mixin_can_access_other_mixin_context(self):
-        view = MyView1()
+        view = MyView1(mode='detail')
         test_data = {
             'mixin1_variable': 34,
             'demo_info': 'azerty',
@@ -100,14 +103,14 @@ class TestView(TestCase):
         view.contribute_to_view(request)
 
     def test_method_not_allowed_if_no_mixins_can_process_it(self):
-        view = MyView1()
+        view = MyView1(mode='detail')
         rf = RequestFactory()
         request = rf.post('/')
         response = view.dispatch(request)
         self.assertTrue(isinstance(response, http.HttpResponseNotAllowed))
 
     def test_method_allowed_if_one_mixin_can_process_it(self):
-        view = MyView1()
+        view = MyView1(mode='detail')
         rf = RequestFactory()
         request = rf.get('/')
         response = view.dispatch(request)

@@ -6,24 +6,10 @@ from django.utils.decorators import classonlymethod
 from django import http
 from django.utils.datastructures import SortedDict
 
+from alternative_views.mixins import Mixin
+
 from django.utils.log import getLogger
 logger = getLogger('django.request')
-
-
-class Mixin(object):
-
-    # Tracks each time a Field instance is created. Used to retain order.
-    creation_counter = 0
-
-    def __init__(self, *args, **kwargs):
-        super(Mixin, self).__init__(*args, **kwargs)
-
-        # Increase the creation counter, and save our local copy.
-        self.creation_counter = Mixin.creation_counter
-        Mixin.creation_counter += 1
-
-    def contribute_to_view(self, request):
-        return {}
 
 
 def get_declared_mixins(bases, attrs):
@@ -66,11 +52,14 @@ class View(object):
     __metaclass__ = ViewMetaclass
 
     http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
+    mode = None
 
     def __init__(self, *args, **kwargs):
-        super(View, self).__init__(*args, **kwargs)
         self.mixins = copy.deepcopy(self.base_mixins)
         self.contributed = {}
+        self.mode = kwargs.get('mode', None)
+        # for name, mixin in self.mixins.iteritems():
+        #     getattr(mixin, 'as_%s' % self.mode)()
 
     def contribute_to_view(self, request):
         """
@@ -114,9 +103,9 @@ class View(object):
 
     def find_http_method(self, method_name):
         method_name = method_name.lower()
-        for name, mixin in self.mixins.iteritems():
-            if hasattr(mixin, method_name):
-                return getattr(mixin, method_name)
+        for name, mixin in reversed(list(self.mixins.iteritems())):
+            if mixin.can_handle_method(method_name, self.mode):
+                return getattr(mixin, '%s_%s' % (self.mode, method_name))
         return self.http_method_not_allowed
 
     def dispatch(self, request, *args, **kwargs):
@@ -143,3 +132,33 @@ class View(object):
             }
         )
         return http.HttpResponseNotAllowed(allowed_methods)
+
+    def _setup_shape(self, shape):
+        for name, mixin in list(self.mixins.itervalues()):
+            if isinstance(mixin, type):
+                self.mixins[name] = getattr(mixin, shape)()
+
+    @classonlymethod
+    def as_list(cls, **kwargs):
+        kwargs['mode'] = 'list'
+        return cls.as_view(**kwargs)
+
+    @classonlymethod
+    def as_create(cls, **kwargs):
+        kwargs['mode'] = 'create'
+        return cls.as_view(**kwargs)
+
+    @classonlymethod
+    def as_detail(cls, **kwargs):
+        kwargs['mode'] = 'detail'
+        return cls.as_view(**kwargs)
+
+    @classonlymethod
+    def as_update(cls, **kwargs):
+        kwargs['mode'] = 'update'
+        return cls.as_view(**kwargs)
+
+    @classonlymethod
+    def as_delete(cls, **kwargs):
+        kwargs['mode'] = 'delete'
+        return cls.as_view(**kwargs)

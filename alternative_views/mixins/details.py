@@ -75,3 +75,98 @@ class ObjectMixin(Mixin):
                         'cls': self.__class__.__name__
                     })
         return self.queryset._clone()
+
+"""
+Model mixin
+"""
+
+from ..base import Mixin
+
+# Methods:
+# ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
+METHODS_FOR_MODE = {
+    'list': ['get'],
+    'detail': ['get'],
+    'update': ['get', 'post'],
+    'delete': ['get', 'post'],
+    'new': ['get', 'post'],
+}
+
+
+class ObjectDetailMixin(object):
+
+    def contribute_to_view_detail(self, request):
+        return {
+            'objects': self.get_query_set().all()
+        }
+
+    def get_detail(self, request):
+        return {
+            'objects': self.get_query_set().all()
+        }
+
+
+class ModelMixin(Mixin):
+    model = None
+    queryset = None
+
+    def get_query_set(self):
+        if self.queryset:
+            return self.queryset
+        # Guess from model
+        return self.model.objects
+
+    def __init__(self, mode=None, **kwargs):
+        super(ModelMixin, self).__init__(**kwargs)
+        if mode not in METHODS_FOR_MODE:
+            raise KeyError('Unknown mode: %s')
+        self.mode = mode
+        self.allowed_methods = METHODS_FOR_MODE[mode]
+
+        contribute_to_view = getattr(self, 'contribute_to_view_%s' % (mode,))
+        setattr(self, 'contribute_to_view', contribute_to_view)
+
+        for method in self.allowed_methods:
+            entry_point = getattr(self, '%s_%s' % (method, mode))
+            setattr(self, method, entry_point)
+
+        self.template_name_suffix = "_%s" % (mode,)
+
+    # def get_template_names(self):
+    #     """
+    #     Return a list of template names to be used for the request. Must return
+    #     a list. May not be called if get_template is overridden.
+    #     """
+    #     try:
+    #         names = super(ModelMixin, self).get_template_names()
+    #     except ImproperlyConfigured:
+    #         # If template_name isn't specified, it's not a problem --
+    #         # we just start with an empty list.
+    #         names = []
+
+    #     # The least-specific option is the default <app>/<model>_detail.html;
+    #     # only use this if the object in question is a model.
+    #     if hasattr(self.object, '_meta'):
+    #         names.append("%s/%s%s.html" % (
+    #             self.object._meta.app_label,
+    #             self.object._meta.object_name.lower(),
+    #             self.template_name_suffix
+    #         ))
+    #     elif hasattr(self, 'model') and hasattr(self.model, '_meta'):
+    #         names.append("%s/%s%s.html" % (
+    #             self.model._meta.app_label,
+    #             self.model._meta.object_name.lower(),
+    #             self.template_name_suffix
+    #         ))
+    #     return names
+
+    # LIST
+    def contribute_to_view_list(self, request):
+        return {
+            'objects': self.get_query_set().all()
+        }
+
+    def get_list(self, request):
+        return {
+            'objects': self.get_query_set().all()
+        }
