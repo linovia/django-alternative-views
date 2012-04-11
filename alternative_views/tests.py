@@ -1,13 +1,16 @@
 
 # from django.test import TestCase
 from django.test import RequestFactory
+from django.shortcuts import render
 from django import http
+
 from unittest2 import TestCase
-from alternative_views.base import View
-from alternative_views.mixins import Mixin
 from mock import Mock
 import types
 import copy
+
+from alternative_views.base import View
+from alternative_views.mixins import Mixin
 
 
 class MyMixin1(Mixin):
@@ -19,6 +22,27 @@ class MyMixin1(Mixin):
 
 class MyMixin2(Mixin):
     pass
+
+
+class ForbiddenMixin(Mixin):
+    def authorization(self, request, context):
+        return False
+
+
+class ContextMixin(Mixin):
+    def get_context(self, request, context):
+        super(ContextMixin, self).get_context(request, context)
+        context['updated_infos'] = True
+        return context
+
+
+class ContextMixin2(Mixin):
+    template_name = 'demo.html'
+
+    def get_context(self, request, context):
+        super(ContextMixin2, self).get_context(request, context)
+        context['context_mixin2_was_there'] = 'Some data'
+        return context
 
 
 class MyView1(View):
@@ -33,6 +57,18 @@ class MyView2(View):
 
 class MySubView(MyView1):
     mixin3 = MyMixin1()
+
+
+class ForbiddenView(View):
+    mixin1 = MyMixin1()
+    forbidden = ForbiddenMixin()
+    mixin2 = MyMixin2()
+
+
+class ContentView(View):
+    mixin1 = MyMixin1()
+    context1 = ContextMixin()
+    context2 = ContextMixin2()
 
 
 class TestMixins(TestCase):
@@ -66,54 +102,34 @@ class TestView(TestCase):
         self.assertEqual(view.mixins.keys(), [])
         self.assertEqual(MyView1.base_mixins.keys(), ['mixin1', 'mixin2'])
 
-    def test_mixins_contribute_to_view_is_called_from_view(self):
-        view = MyView1(mode='detail')
-        m1, m2 = Mock(), Mock()
-        m1.return_value, m2.return_value = {}, {}
-        view.mixins['mixin1'].contribute_to_view = m1
-        view.mixins['mixin2'].contribute_to_view = m2
-        request = Mock()
-        view.contribute_to_view(request)
-        self.assertTrue(m1.called)
-        self.assertEqual(m1.call_count, 1)
-        self.assertTrue(m2.called)
-        self.assertEqual(m2.call_count, 1)
-
-    def test_mixin_can_access_other_mixin_context(self):
-        view = MyView1(mode='detail')
-        test_data = {
-            'mixin1_variable': 34,
-            'demo_info': 'azerty',
-        }
-        test_case = self
-
-        def contribute_to_view1(self, request):
-            return copy.deepcopy(test_data)
-
-        def contribute_to_view2(self, request):
-            for key, value in test_data.iteritems():
-                test_case.assertTrue(hasattr(self, key))
-                test_case.assertEqual(getattr(self, key), value)
-            return {}
-
-        mixin1, mixin2 = view.mixins['mixin1'], view.mixins['mixin2']
-        mixin1.contribute_to_view = types.MethodType(contribute_to_view1, mixin1)
-        mixin2.contribute_to_view = types.MethodType(contribute_to_view2, mixin2)
-        request = Mock()
-        view.contribute_to_view(request)
-
-    def test_method_not_allowed_if_no_mixins_can_process_it(self):
-        view = MyView1(mode='detail')
+    def test_authorizations(self):
+        from  django.core.exceptions import PermissionDenied
+        view = ForbiddenView(mode='detail')
         rf = RequestFactory()
-        request = rf.post('/')
-        response = view.dispatch(request)
-        self.assertTrue(isinstance(response, http.HttpResponseNotAllowed))
+        request = rf.get('/')
+        with self.assertRaises(PermissionDenied):
+            view.dispatch(request)
 
-    def test_method_allowed_if_one_mixin_can_process_it(self):
-        view = MyView1(mode='detail')
+    def test_context_updates(self):
+        view = ContentView(mode='detail')
+        rf = RequestFactory()
+        request = rf.get('/')
+        view.dispatch(request)
+        expected_context = {
+            'updated_infos': True,
+            'context_mixin2_was_there': 'Some data',
+        }
+        self.assertEqual(view.context, expected_context)
+
+    def test_view_returns_a_http_response(self):
+        from django.http import HttpResponse
+        view = ContentView(mode='detail')
         rf = RequestFactory()
         request = rf.get('/')
         response = view.dispatch(request)
-        self.assertEqual(type(response), http.HttpResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'OK')
+        self.assertTrue(isinstance(response, HttpResponse))
+        expected_context = {
+            'updated_infos': True,
+            'context_mixin2_was_there': 'Some data',
+        }
+        self.assertEqual(response.context_data, expected_context)

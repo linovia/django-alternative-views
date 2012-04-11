@@ -1,4 +1,13 @@
+"""
+alternative_views
+~~~~~~~~~~~~~~~~~
 
-from base import View
-from mixins import Mixin
-from mixins.model import ObjectMixin
+:copyright: (c) 2012 by Linovia, see AUTHORS for more details.
+:license: BSD, see LICENSE for more details.
+"""
+
+try:
+    VERSION = __import__('pkg_resources') \
+        .get_distribution('alternative_views').version
+except Exception, e:
+    VERSION = 'unknown'

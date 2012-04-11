@@ -63,6 +63,25 @@ Forseen issues
 
 * Use prefix in forms so that we can make sure which form has been posted if
 several are available.
+
 * Reverse order: Mixins' get or post should be processed from bottom to top.
 The most specialised mixin in the view should be the lastest while the most
 general one should be on top.
+
+
+
+Required for Mixins
+===================
+
+* Context generation: function that should take a context dict as argument and
+return the updated context. The returned context will be passed to the following
+mixins so that one mixin that depends on the other will still be able to
+specialize its data.
+
+* Authorization: Probably called by the context generation function.
+
+* Request method check: should respond True or False according to the ability
+to answer a given request type.
+
+* Template name: returns a template name. The view should probably call this
+function in the reverse mixin order.

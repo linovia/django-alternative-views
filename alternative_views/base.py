@@ -2,9 +2,11 @@
 import copy
 
 from functools import update_wrapper
+
 from django.utils.decorators import classonlymethod
-from django import http
+from django.template.response import TemplateResponse
 from django.utils.datastructures import SortedDict
+from django import http
 
 from alternative_views.mixins import Mixin
 
@@ -58,8 +60,7 @@ class View(object):
         self.mixins = copy.deepcopy(self.base_mixins)
         self.contributed = {}
         self.mode = kwargs.get('mode', None)
-        # for name, mixin in self.mixins.iteritems():
-        #     getattr(mixin, 'as_%s' % self.mode)()
+        self.context = {}
 
     def contribute_to_view(self, request):
         """
@@ -101,28 +102,35 @@ class View(object):
         update_wrapper(view, cls.dispatch, assigned=())
         return view
 
-    def find_http_method(self, method_name):
-        method_name = method_name.lower()
+    def find_http_method(self, request):
+        """
+        Searches for a mixin that can respond to the request.
+        Search order is reversed as we expect latest mixins to be more
+        specialized than the firsts.
+        """
         for name, mixin in reversed(list(self.mixins.iteritems())):
-            if mixin.can_handle_method(method_name, self.mode):
-                return getattr(mixin, '%s_%s' % (self.mode, method_name))
+            if mixin.can_process(request):
+                return getattr(mixin, 'process')
         return self.http_method_not_allowed
 
     def dispatch(self, request, *args, **kwargs):
         # Try to dispatch to the right method; if a method doesn't exist,
         # defer to the error handler. Also defer to the error handler if the
         # request method isn't on the approved list.
+        self.context = {}
+        for mixin in self.mixins.values():
+            self.context = mixin.get_context(request, self.context)
+
         if request.method.lower() in self.http_method_names:
-            # TODO
-            handler = self.find_http_method(request.method)
+            handler = self.find_http_method(request)
         else:
             handler = self.http_method_not_allowed
         self.request = request
         self.args = args
         self.kwargs = kwargs
-        return handler(request, *args, **kwargs)
+        return handler(request, self.context, *args, **kwargs)
 
-    def http_method_not_allowed(self, request, *args, **kwargs):
+    def http_method_not_allowed(self, request, context, *args, **kwargs):
         allowed_methods = [m for m in self.http_method_names if hasattr(self, m)]
         logger.warning(
             'Method Not Allowed (%s): %s' % (request.method, request.path),
@@ -132,33 +140,3 @@ class View(object):
             }
         )
         return http.HttpResponseNotAllowed(allowed_methods)
-
-    def _setup_shape(self, shape):
-        for name, mixin in list(self.mixins.itervalues()):
-            if isinstance(mixin, type):
-                self.mixins[name] = getattr(mixin, shape)()
-
-    @classonlymethod
-    def as_list(cls, **kwargs):
-        kwargs['mode'] = 'list'
-        return cls.as_view(**kwargs)
-
-    @classonlymethod
-    def as_create(cls, **kwargs):
-        kwargs['mode'] = 'create'
-        return cls.as_view(**kwargs)
-
-    @classonlymethod
-    def as_detail(cls, **kwargs):
-        kwargs['mode'] = 'detail'
-        return cls.as_view(**kwargs)
-
-    @classonlymethod
-    def as_update(cls, **kwargs):
-        kwargs['mode'] = 'update'
-        return cls.as_view(**kwargs)
-
-    @classonlymethod
-    def as_delete(cls, **kwargs):
-        kwargs['mode'] = 'delete'
-        return cls.as_view(**kwargs)
