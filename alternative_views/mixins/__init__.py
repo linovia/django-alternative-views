@@ -19,6 +19,7 @@ class BaseMixin(object):
 
 
 class Mixin(BaseMixin):
+    mode = None
     template_name = None
     response_class = TemplateResponse
 
@@ -44,24 +45,24 @@ class Mixin(BaseMixin):
         """
         return request.method.lower() in self.http_method_names
 
-    def process(self, request, context, mode=None):
+    def process(self, request, context):
         """
         Process the request
         """
-        return self.render_to_response(request, context, mode)
+        return self.render_to_response(request, context)
 
-    def render_to_response(self, request, context, mode=None, **response_kwargs):
+    def render_to_response(self, request, context, **response_kwargs):
         """
         Returns a response with a template rendered with the given context.
         """
         return self.response_class(
             request=request,
-            template=self.get_template_names(mode),
+            template=self.get_template_names(),
             context=context,
             **response_kwargs
         )
 
-    def get_template_names(self, mode=None):
+    def get_template_names(self):
         """
         Returns a list of template names to be used for the request. Must return
         a list. May not be called if render_to_response is overridden.
