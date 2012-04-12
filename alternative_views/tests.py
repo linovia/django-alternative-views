@@ -1,16 +1,17 @@
 
 # from django.test import TestCase
 from django.test import RequestFactory
-from django.shortcuts import render
 from django import http
+from django.db import models
 
 from unittest2 import TestCase
-from mock import Mock
-import types
-import copy
+# from mock import Mock
+# import types
+# import copy
 
 from alternative_views.base import View
 from alternative_views.mixins import Mixin
+from alternative_views.mixins.object import ObjectMixin
 
 
 class MyMixin1(Mixin):
@@ -133,3 +134,31 @@ class TestView(TestCase):
             'context_mixin2_was_there': 'Some data',
         }
         self.assertEqual(response.context_data, expected_context)
+
+
+#
+# ObjectMixin tests
+#
+
+class MyObjectModel(models.Model):
+    pass
+
+
+class MyObjectMixin(ObjectMixin):
+    model = MyObjectModel
+
+
+class TestObjectMixin(TestCase):
+
+    def test_template_names(self):
+        object_mixin = MyObjectMixin()
+        template_names = object_mixin.get_template_names('list')
+        self.assertEqual(template_names,
+            ['alternative_views/myobjectmodel_list.html']
+        )
+        object_mixin.template_name_prefix = 'demo/project'
+        template_names = object_mixin.get_template_names('detail')
+        self.assertEqual(template_names, [
+            'demo/project_detail.html',
+            'alternative_views/myobjectmodel_detail.html',
+        ])
