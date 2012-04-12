@@ -60,19 +60,8 @@ class View(object):
         self.contributed = {}
         self.mode = kwargs.get('mode', None)
         self.context = {}
-
-    def contribute_to_view(self, request):
-        """
-        For each mixin, sets the context, calls the contribute_to_view and
-        update the view context according to their return
-        """
-        for name, mixin in self.mixins.iteritems():
-            for key, value in self.contributed.iteritems():
-                if hasattr(mixin, key):
-                    self.logger.warning('Overriding %s in %s.' % (key, name))
-                setattr(mixin, key, value)
-            contribution = mixin.contribute_to_view(request)
-            self.contributed.update(contribution)
+        for mixin in self.mixins.itervalues():
+            mixin.mode = self.mode
 
     @classonlymethod
     def as_view(cls, **initkwargs):
