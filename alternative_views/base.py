@@ -4,7 +4,6 @@ import copy
 from functools import update_wrapper
 
 from django.utils.decorators import classonlymethod
-from django.template.response import TemplateResponse
 from django.utils.datastructures import SortedDict
 from django import http
 
