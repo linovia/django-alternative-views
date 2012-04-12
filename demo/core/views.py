@@ -1,11 +1,11 @@
 
 from alternative_views.base import View
-from alternative_views.mixins import Mixin
+from alternative_views.mixins.object import ObjectMixin
 
 from core.models import Project
 
 
-class ProjectMixin(Mixin):
+class ProjectMixin(ObjectMixin):
     template_name = 'project.html'
     model = Project
 
