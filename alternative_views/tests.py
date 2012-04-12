@@ -152,12 +152,15 @@ class TestObjectMixin(TestCase):
 
     def test_template_names(self):
         object_mixin = MyObjectMixin()
-        template_names = object_mixin.get_template_names('list')
-        self.assertEqual(template_names,
-            ['alternative_views/myobjectmodel_list.html']
-        )
+        object_mixin.mode = 'list'
+        template_names = object_mixin.get_template_names()
+        self.assertEqual(template_names, [
+            'alternative_views/myobjectmodel_list.html'
+        ])
+
+        object_mixin.mode = 'detail'
         object_mixin.template_name_prefix = 'demo/project'
-        template_names = object_mixin.get_template_names('detail')
+        template_names = object_mixin.get_template_names()
         self.assertEqual(template_names, [
             'demo/project_detail.html',
             'alternative_views/myobjectmodel_detail.html',
