@@ -1,2 +1,3 @@
 *.pyc
 django_alternative_views.egg-info
+demo.db
