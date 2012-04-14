@@ -17,9 +17,6 @@ from alternative_views.mixins.object import ObjectMixin
 class MyMixin1(Mixin):
     allowed_methods = ['get']
 
-    def detail_get(self, request, *args, **kwargs):
-        return http.HttpResponse('OK')
-
 
 class MyMixin2(Mixin):
     pass
