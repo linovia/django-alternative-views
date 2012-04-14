@@ -1,7 +1,9 @@
 Django alternative views
 ========================
 
-https://secure.travis-ci.org/linovia/django-alternative-views.png?branch=master
+.. image:: https://secure.travis-ci.org/linovia/django-alternative-views.png?branch=master
+   :alt: Build Status
+   :target: http://travis-ci.org/linovia/django-alternative-views
 
 This is work in progress and shouldn't be used yet.
 
