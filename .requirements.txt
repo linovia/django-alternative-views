@@ -1,0 +1,6 @@
+#
+# DON'T USE THAT FILE
+# THIS IS FOR TRAVIS CI ONLY
+#
+mock==0.8.0
+unittest2==0.5.1
