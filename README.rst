@@ -1,6 +1,8 @@
 Django alternative views
 ========================
 
+https://secure.travis-ci.org/linovia/django-alternative-views.png?branch=master
+
 This is work in progress and shouldn't be used yet.
 
 This package provides an alternative implementation of Django generic
