@@ -1,12 +1,8 @@
 
 # from django.test import TestCase
 from django.test import RequestFactory
-from django import http
 
-from unittest2 import TestCase
-# from mock import Mock
-# import types
-# import copy
+from django.test import TestCase
 
 from alternative_views.base import View
 from alternative_views.mixins import Mixin
