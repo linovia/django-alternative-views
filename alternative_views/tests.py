@@ -141,12 +141,21 @@ class MyObjectModel(models.Model):
     pass
 
 
+class MyOtherObjectModel(models.Model):
+    pass
+
+
 class MyObjectMixin(ObjectMixin):
     model = MyObjectModel
 
 
+class MyOtherObjectMixin(ObjectMixin):
+    model = MyOtherObjectModel
+
+
 class ObjectView(View):
     obj = MyObjectMixin()
+    other = MyOtherObjectMixin()
 
 
 class TestObjectMixin(TestCase):
@@ -175,4 +184,5 @@ class TestObjectMixinIntegrationWithView(TestCase):
         rf = RequestFactory()
         request = rf.get('/')
         response = view(request)
-        self.assertEqual(response.context_data.keys(), ['myobjectmodel_list'])
+        self.assertEqual(response.context_data.keys(),
+            ['myotherobjectmodel_list', 'myobjectmodel_list'])
