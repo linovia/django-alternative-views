@@ -29,7 +29,11 @@ def runtests(*test_args):
         test_args = ['alternative_views']
     parent = dirname(abspath(__file__))
     sys.path.insert(0, parent)
-    failures = DjangoTestSuiteRunner().run_tests(test_args, verbosity=1, interactive='--no-input' not in sys.argv)
+    failures = DjangoTestSuiteRunner(failfast=False).run_tests(
+        test_args,
+        verbosity=1,
+        interactive='--no-input' not in sys.argv
+    )
     sys.exit(failures)
 
 if __name__ == '__main__':
