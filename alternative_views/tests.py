@@ -186,12 +186,12 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     def test_setting_mode_on_creation_does_not_override_class_value(self):
         view = ObjectView(mode='list')
-        instance_mode = view.mixins['other'].mode
-        self.assertEqual(instance_mode, 'list')
+        self.assertEqual(view.mixins['obj'].mode, 'list')
+        self.assertEqual(view.mixins['other'].mode, 'list')
 
         view = ObjectView(mode='detail')
-        instance_mode = view.mixins['other'].mode
-        self.assertEqual(instance_mode, 'list')
+        self.assertEqual(view.mixins['obj'].mode, 'detail')
+        self.assertEqual(view.mixins['other'].mode, 'list')
 
     def test_same_mixins_with_different_names(self):
         view = SameMixinView.as_view(mode='list')
