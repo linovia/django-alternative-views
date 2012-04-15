@@ -59,5 +59,5 @@ class ObjectMixin(Mixin):
     def get_context(self, request, context):
         context = super(ObjectMixin, self).get_context(request, context)
         if self.mode == 'list':
-            context[self.get_model_name()] = self.get_queryset().all()
+            context['%s_list' % self.get_model_name()] = self.get_queryset().all()
         return context

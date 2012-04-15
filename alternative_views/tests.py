@@ -145,6 +145,10 @@ class MyObjectMixin(ObjectMixin):
     model = MyObjectModel
 
 
+class ObjectView(View):
+    obj = MyObjectMixin()
+
+
 class TestObjectMixin(TestCase):
 
     def test_template_names(self):
@@ -162,3 +166,13 @@ class TestObjectMixin(TestCase):
             'demo/project_detail.html',
             'alternative_views/myobjectmodel_detail.html',
         ])
+
+
+class TestObjectMixinIntegrationWithView(TestCase):
+
+    def test_context_for_list_mode(self):
+        view = ObjectView.as_view(mode='list')
+        rf = RequestFactory()
+        request = rf.get('/')
+        response = view(request)
+        self.assertEqual(response.context_data.keys(), ['myobjectmodel_list'])
