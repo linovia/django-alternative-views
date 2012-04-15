@@ -155,7 +155,7 @@ class MyOtherObjectMixin(ObjectMixin):
 
 class ObjectView(View):
     obj = MyObjectMixin()
-    other = MyOtherObjectMixin()
+    other = MyOtherObjectMixin(mode='list')
 
 
 class TestObjectMixin(TestCase):
@@ -179,6 +179,18 @@ class TestObjectMixin(TestCase):
 
 class TestObjectMixinIntegrationWithView(TestCase):
 
+    def test_setting_mode_on_creation_does_not_override_class_value(self):
+        view = ObjectView(mode='list')
+        instance_mode = view.mixins['other'].mode
+        self.assertEqual(instance_mode, 'list')
+
+        view = ObjectView(mode='detail')
+        instance_mode = view.mixins['other'].mode
+        self.assertEqual(instance_mode, 'list')
+
+    def test_same_mixins_with_different_names(self):
+        self.assertTrue(False)
+
     def test_context_for_list_mode(self):
         view = ObjectView.as_view(mode='list')
         rf = RequestFactory()
@@ -186,3 +198,11 @@ class TestObjectMixinIntegrationWithView(TestCase):
         response = view(request)
         self.assertEqual(response.context_data.keys(),
             ['myotherobjectmodel_list', 'myobjectmodel_list'])
+
+    def test_context_for_detail_mode(self):
+        view = ObjectView.as_view(mode='detail')
+        rf = RequestFactory()
+        request = rf.get('/')
+        response = view(request)
+        self.assertEqual(response.context_data.keys(),
+            ['myotherobjectmodel_list', 'myobjectmodel'])

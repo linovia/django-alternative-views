@@ -25,6 +25,13 @@ class Mixin(BaseMixin):
 
     http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
 
+    def __init__(self, *args, **kwargs):
+        mode = kwargs.pop('mode', None)
+        super(Mixin, self).__init__(*args, **kwargs)
+        # Don't override mode if it was defined at the class level
+        if not self.mode:
+            self.mode = mode
+
     def authorization(self, request, context):
         """
         Returns True if the user has enough rights for this request.

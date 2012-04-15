@@ -61,7 +61,8 @@ class View(object):
         self.mode = kwargs.get('mode', None)
         self.context = {}
         for mixin in self.mixins.itervalues():
-            mixin.mode = self.mode
+            if not mixin.mode:
+                mixin.mode = self.mode
 
     @classonlymethod
     def as_view(cls, **initkwargs):
