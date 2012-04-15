@@ -58,9 +58,9 @@ class ObjectMixin(Mixin):
                     })
         return self.queryset._clone()
 
-    def get_object(self):
-        obj = None
-        return obj
+    def get_object(self, request):
+        filters = {}
+        return self.get_queryset().get(**filters)
 
     def get_context(self, request, context):
         context = super(ObjectMixin, self).get_context(request, context)
@@ -69,7 +69,7 @@ class ObjectMixin(Mixin):
             context[context_name] = self.get_queryset().all()
         elif self.mode == 'detail':
             context_name = '%s' % self.get_model_name()
-            context[context_name] = self.get_object()
+            context[context_name] = self.get_object(request)
         else:
             raise NotImplementedError('Unimplemented mode: %s' % self.mode)
         return context
