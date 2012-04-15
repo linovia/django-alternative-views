@@ -2,7 +2,6 @@
 # from django.test import TestCase
 from django.test import RequestFactory
 from django import http
-from django.db import models
 
 from unittest2 import TestCase
 # from mock import Mock
@@ -136,13 +135,7 @@ class TestView(TestCase):
 #
 # ObjectMixin tests
 #
-
-class MyObjectModel(models.Model):
-    pass
-
-
-class MyOtherObjectModel(models.Model):
-    pass
+from .models import MyObjectModel, MyOtherObjectModel
 
 
 class MyObjectMixin(ObjectMixin):
@@ -170,7 +163,7 @@ class TestObjectMixin(TestCase):
         object_mixin.instance_name = 'myobjectmodel'
         template_names = object_mixin.get_template_names()
         self.assertEqual(template_names, [
-            'alternative_views/myobjectmodel_list.html'
+            'local_tests/myobjectmodel_list.html'
         ])
 
         object_mixin.mode = 'detail'
@@ -178,11 +171,13 @@ class TestObjectMixin(TestCase):
         template_names = object_mixin.get_template_names()
         self.assertEqual(template_names, [
             'demo/project_detail.html',
-            'alternative_views/myobjectmodel_detail.html',
+            'local_tests/myobjectmodel_detail.html',
         ])
 
 
 class TestObjectMixinIntegrationWithView(TestCase):
+
+    fixtures = ['basic_mixins_test.json']
 
     def test_setting_mode_on_creation_does_not_override_class_value(self):
         view = ObjectView(mode='list')
