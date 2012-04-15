@@ -158,11 +158,16 @@ class ObjectView(View):
     other = MyOtherObjectMixin(mode='list')
 
 
+class SameMixinView(View):
+    obj1 = MyObjectMixin()
+    obj2 = MyObjectMixin()
+
+
 class TestObjectMixin(TestCase):
 
     def test_template_names(self):
-        object_mixin = MyObjectMixin()
-        object_mixin.mode = 'list'
+        object_mixin = MyObjectMixin(mode='list')
+        object_mixin.instance_name = 'myobjectmodel'
         template_names = object_mixin.get_template_names()
         self.assertEqual(template_names, [
             'alternative_views/myobjectmodel_list.html'
@@ -189,7 +194,12 @@ class TestObjectMixinIntegrationWithView(TestCase):
         self.assertEqual(instance_mode, 'list')
 
     def test_same_mixins_with_different_names(self):
-        self.assertTrue(False)
+        view = SameMixinView.as_view(mode='list')
+        rf = RequestFactory()
+        request = rf.get('/')
+        response = view(request)
+        self.assertEqual(response.context_data.keys(),
+            ['obj1_list', 'obj2_list'])
 
     def test_context_for_list_mode(self):
         view = ObjectView.as_view(mode='list')
@@ -197,7 +207,7 @@ class TestObjectMixinIntegrationWithView(TestCase):
         request = rf.get('/')
         response = view(request)
         self.assertEqual(response.context_data.keys(),
-            ['myotherobjectmodel_list', 'myobjectmodel_list'])
+            ['obj_list', 'other_list'])
 
     def test_context_for_detail_mode(self):
         view = ObjectView.as_view(mode='detail')
@@ -205,4 +215,4 @@ class TestObjectMixinIntegrationWithView(TestCase):
         request = rf.get('/')
         response = view(request)
         self.assertEqual(response.context_data.keys(),
-            ['myotherobjectmodel_list', 'myobjectmodel'])
+            ['obj', 'other_list'])

@@ -60,7 +60,8 @@ class View(object):
         self.contributed = {}
         self.mode = kwargs.get('mode', None)
         self.context = {}
-        for mixin in self.mixins.itervalues():
+        for name, mixin in self.mixins.iteritems():
+            mixin.instance_name = name
             if not mixin.mode:
                 mixin.mode = self.mode
 

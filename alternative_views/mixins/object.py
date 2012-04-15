@@ -5,13 +5,15 @@ from alternative_views.mixins import Mixin
 
 
 class ObjectMixin(Mixin):
+    instance_name = None
     model = None
     queryset = None
 
     template_name_prefix = None
 
     def get_model_name(self):
-        return self.model._meta.object_name.lower()
+        # return self.model._meta.object_name.lower()
+        return self.instance_name
 
     def get_template_names(self):
         """
