@@ -20,6 +20,7 @@ class BaseMixin(object):
 
 class Mixin(BaseMixin):
     mode = None
+    instance_name = None
     template_name = None
     response_class = TemplateResponse
 
@@ -34,17 +35,21 @@ class Mixin(BaseMixin):
 
     def authorization(self, request, context):
         """
-        Returns True if the user has enough rights for this request.
+        Returns True if the user has enough rights for this request,
+        None if the mixin has no opinions and False if it is refused.
         """
-        return True
+        return None
 
-    def get_context(self, request, context):
+    def get_context(self, request, context, permissions=None, **kwargs):
         """
         Returns an updated context for the given request processing.
         """
-        if not self.authorization(request, context):
-            raise PermissionDenied()
-        return context
+        permission = self.authorization(request, context)
+        if permissions is not None:
+            permissions[self.instance_name] = permission
+        if permission is True or permission is None:
+            return context
+        raise PermissionDenied()
 
     def can_process(self, request):
         """

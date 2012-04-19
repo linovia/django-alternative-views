@@ -13,6 +13,10 @@ from django.utils.log import getLogger
 logger = getLogger('django.request')
 
 
+# Monkey patch SortedDict to work with copy
+SortedDict.__copy__ = SortedDict.copy
+
+
 def get_declared_mixins(bases, attrs):
     """
     Create a list of mixin instances from the passed in 'attrs', plus any
@@ -52,15 +56,21 @@ class View(object):
 
     __metaclass__ = ViewMetaclass
 
-    http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
+    http_method_names = [
+        'get', 'post', 'put', 'delete', 'head', 'options', 'trace'
+    ]
     mode = None
 
+    default_security = 'allow'
+
     def __init__(self, *args, **kwargs):
-        self.mixins = copy.deepcopy(self.base_mixins)
+        self.base_mixins = copy.copy(self.base_mixins)
+        self.mixins = copy.copy(self.base_mixins)
         self.contributed = {}
         self.mode = kwargs.get('mode', None)
         self.context = {}
-        for name, mixin in self.mixins.iteritems():
+        # Move the mixins and duplicate them
+        for name, mixin in self.base_mixins.iteritems():
             mixin.instance_name = name
             if not mixin.mode:
                 mixin.mode = self.mode
@@ -108,8 +118,14 @@ class View(object):
         # defer to the error handler. Also defer to the error handler if the
         # request method isn't on the approved list.
         self.context = {}
+        permissions = {}
         for mixin in self.mixins.values():
-            self.context = mixin.get_context(request, self.context)
+            self.context = mixin.get_context(
+                request, self.context, permissions=permissions, **kwargs)
+            if not any(permissions.values()) and \
+                not self.default_security == 'allow':
+                from django.core.exceptions import PermissionDenied
+                raise PermissionDenied()
 
         if request.method.lower() in self.http_method_names:
             handler = self.find_http_method(request)

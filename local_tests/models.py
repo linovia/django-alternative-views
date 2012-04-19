@@ -3,8 +3,16 @@ from django.db import models
 
 
 class MyObjectModel(models.Model):
-    pass
+    class Meta:
+        ordering = ['id']
+
+    def __unicode__(self):
+        return u'%i' % (self.id,)
 
 
 class MyOtherObjectModel(models.Model):
-    pass
+    class Meta:
+        ordering = ['id']
+
+    def __unicode__(self):
+        return u'%i' % (self.id,)

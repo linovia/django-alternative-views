@@ -1,10 +1,54 @@
 
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.http import Http404
+from django.utils.translation import ugettext as _
 
 from alternative_views.mixins import Mixin
 
 
-class ObjectMixin(Mixin):
+class SingleObjectMixin(Mixin):
+
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+    pk_url_kwarg = 'pk'
+
+    def get_slug_field(self):
+        """
+        Get the name of a slug field to be used to look up by slug.
+        """
+        return self.slug_field
+
+    def get_object(self, request):
+        queryset = self.queryset
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        # Next, try looking up by primary key.
+        pk = self.kwargs.get(self.pk_url_kwarg, None)
+        slug = self.kwargs.get(self.slug_url_kwarg, None)
+        if pk is not None:
+            queryset = queryset.filter(pk=pk)
+
+        # Next, try looking up by slug.
+        elif slug is not None:
+            slug_field = self.get_slug_field()
+            queryset = queryset.filter(**{slug_field: slug})
+
+        # If none of those are defined, it's an error.
+        else:
+            raise AttributeError(u"Generic detail view %s must be called with "
+                                 u"either an object pk or a slug."
+                                 % self.__class__.__name__)
+
+        try:
+            obj = queryset.get()
+        except ObjectDoesNotExist:
+            raise Http404(_(u"No %(verbose_name)s found matching the query") %
+                          {'verbose_name': queryset.model._meta.verbose_name})
+        return obj
+
+
+class ObjectMixin(SingleObjectMixin, Mixin):
     instance_name = None
     model = None
     queryset = None
@@ -58,12 +102,9 @@ class ObjectMixin(Mixin):
                     })
         return self.queryset._clone()
 
-    def get_object(self, request):
-        filters = {}
-        return self.get_queryset().get(**filters)
-
-    def get_context(self, request, context):
-        context = super(ObjectMixin, self).get_context(request, context)
+    def get_context(self, request, context, permissions, **kwargs):
+        context = super(ObjectMixin, self).get_context(
+            request, context, permissions, **kwargs)
         if self.mode == 'list':
             context_name = '%s_list' % self.get_model_name()
             context[context_name] = self.get_queryset().all()

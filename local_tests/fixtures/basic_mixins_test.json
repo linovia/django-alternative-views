@@ -4,5 +4,23 @@
     "model": "local_tests.myobjectmodel",
     "fields": {
     }
+  },
+  {
+    "pk": 2,
+    "model": "local_tests.myobjectmodel",
+    "fields": {
+    }
+  },
+  {
+    "pk": 3,
+    "model": "local_tests.myotherobjectmodel",
+    "fields": {
+    }
+  },
+  {
+    "pk": 4,
+    "model": "local_tests.myotherobjectmodel",
+    "fields": {
+    }
   }
 ]
