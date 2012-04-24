@@ -64,7 +64,7 @@ class View(object):
     default_security = 'allow'
 
     def __init__(self, *args, **kwargs):
-        self.base_mixins = copy.copy(self.base_mixins)
+        self.base_mixins = copy.deepcopy(self.base_mixins)
         self.mixins = copy.copy(self.base_mixins)
         self.contributed = {}
         self.mode = kwargs.get('mode', None)
@@ -72,6 +72,8 @@ class View(object):
         # Move the mixins and duplicate them
         for name, mixin in self.base_mixins.iteritems():
             mixin.instance_name = name
+            mixin.args = copy.deepcopy(args)
+            mixin.kwargs = copy.deepcopy(kwargs)
             if not mixin.mode:
                 mixin.mode = self.mode
 
@@ -120,6 +122,8 @@ class View(object):
         self.context = {}
         permissions = {}
         for mixin in self.mixins.values():
+            mixin.args += args
+            mixin.kwargs.update(kwargs)
             self.context = mixin.get_context(
                 request, self.context, permissions=permissions, **kwargs)
             if not any(permissions.values()) and \

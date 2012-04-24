@@ -52,6 +52,8 @@ class TestObjectMixin(TestCase):
 class TestObjectMixinIntegrationWithView(TestCase):
 
     fixtures = ['basic_mixins_test.json']
+    urls = 'local_tests.tests.object_urls'
+#    urls = 'tests.object_urls'
 
     def test_setting_mode_on_creation_does_not_override_class_value(self):
         view = ObjectView(mode='list')
@@ -79,9 +81,10 @@ class TestObjectMixinIntegrationWithView(TestCase):
             ['obj_list', 'other_list'])
 
     def test_context_for_detail_mode(self):
-        view = ObjectView.as_view(mode='detail')
-        rf = RequestFactory()
-        request = rf.get('/')
-        response = view(request)
+        # view = ObjectView.as_view(mode='detail')
+        # rf = RequestFactory()
+        # request = rf.get('/')
+        # response = view(request)
+        response = self.client.get('/object/1/')
         self.assertEqual(response.context_data.keys(),
             ['obj', 'other_list'])

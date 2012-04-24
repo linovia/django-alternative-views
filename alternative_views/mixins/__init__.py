@@ -57,7 +57,7 @@ class Mixin(BaseMixin):
         """
         return request.method.lower() in self.http_method_names
 
-    def process(self, request, context):
+    def process(self, request, context, **kwargs):
         """
         Process the request
         """
