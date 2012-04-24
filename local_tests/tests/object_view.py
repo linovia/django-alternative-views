@@ -73,18 +73,27 @@ class TestObjectMixinIntegrationWithView(TestCase):
             ['obj1_list', 'obj2_list'])
 
     def test_context_for_list_mode(self):
-        view = ObjectView.as_view(mode='list')
-        rf = RequestFactory()
-        request = rf.get('/')
-        response = view(request)
+        response = self.client.get('/object/')
         self.assertEqual(response.context_data.keys(),
             ['obj_list', 'other_list'])
+        self.assertEqual(
+            [(o.id, type(o)) for o in response.context_data['obj_list']],
+            [(o.id, type(o)) for o in MyObjectModel.objects.all()]
+        )
+        self.assertEqual(
+            [(o.id, type(o)) for o in response.context_data['other_list']],
+            [(o.id, type(o)) for o in MyOtherObjectModel.objects.all()]
+        )
 
     def test_context_for_detail_mode(self):
-        # view = ObjectView.as_view(mode='detail')
-        # rf = RequestFactory()
-        # request = rf.get('/')
-        # response = view(request)
         response = self.client.get('/object/1/')
         self.assertEqual(response.context_data.keys(),
             ['obj', 'other_list'])
+        self.assertEqual(
+            response.context_data['obj'],
+            MyObjectModel.objects.get(id=1)
+        )
+        self.assertEqual(
+            [(o.id, type(o)) for o in response.context_data['other_list']],
+            [(o.id, type(o)) for o in MyOtherObjectModel.objects.all()]
+        )

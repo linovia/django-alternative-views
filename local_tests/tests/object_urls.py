@@ -29,5 +29,6 @@ class SameMixinView(View):
 
 
 urlpatterns = patterns('',
+    (r'^object/$', ObjectView.as_view(mode='list')),
     (r'^object/(?P<pk>\d+)/$', ObjectView.as_view(mode='detail')),
 )
