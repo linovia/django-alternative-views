@@ -53,7 +53,6 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     fixtures = ['basic_mixins_test.json']
     urls = 'local_tests.tests.object_urls'
-#    urls = 'tests.object_urls'
 
     def test_setting_mode_on_creation_does_not_override_class_value(self):
         view = ObjectView(mode='list')
