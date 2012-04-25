@@ -5,23 +5,49 @@ from django.utils.translation import ugettext as _
 from alternative_views.mixins import Mixin
 
 from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.list import MultipleObjectMixin
 
 
-class MySingleObjectMixin(SingleObjectMixin):
-    def get_context_object_name(self, obj):
-        return self.instance_name
+class AlternativeSingleObjectMixin(SingleObjectMixin):
+    def get_context_data(self, **kwargs):
+        context = {}
+        obj = kwargs.pop('object')
+        context_object_name = self.get_context_object_name(obj)
+        if context_object_name:
+            context[context_object_name] = obj
+        context.update(kwargs)
+        return context
 
 
-class ObjectMixin(MySingleObjectMixin, Mixin):
+class AlternativeMultipleObjectMixin(MultipleObjectMixin):
+    pass
+
+
+class ObjectMixin(Mixin,
+        AlternativeSingleObjectMixin,
+        AlternativeMultipleObjectMixin):
+
     instance_name = None
     model = None
     queryset = None
 
     template_name_prefix = None
 
-    def get_model_name(self):
-        # return self.model._meta.object_name.lower()
+    def get_object_name(self, *args, **kwargs):
+        """
+        Return a short name for the object.
+        """
         return self.instance_name
+
+    def get_context_object_name(self, *args, **kwargs):
+        """
+        Returns the instance name.
+        Overrides the function from django's generic views.
+        """
+        name = self.get_object_name(*args, **kwargs)
+        if self.mode == 'list':
+            return '%s_list' % (name,)
+        return name
 
     def get_template_names(self):
         """
@@ -44,20 +70,30 @@ class ObjectMixin(MySingleObjectMixin, Mixin):
         if hasattr(self, 'model') and hasattr(self.model, '_meta'):
             names.append("%s/%s_%s.html" % (
                 self.model._meta.app_label,
-                self.get_model_name(),
+                self.get_object_name(),
                 self.mode
             ))
         return names
 
     def get_context(self, request, context, permissions, **kwargs):
+        """
+        Builds a context for this mixin.
+        """
         context = super(ObjectMixin, self).get_context(
             request, context, permissions, **kwargs)
+        local_context = {}
+
         if self.mode == 'list':
-            context_name = '%s_list' % self.get_model_name()
-            context[context_name] = self.get_queryset().all()
+            local_context = AlternativeMultipleObjectMixin.get_context_data(
+                self, object_list=self.get_queryset())
+            # Sanitize the context names
+            del local_context['object_list']
+
         elif self.mode == 'detail':
-            context_name = '%s' % self.get_model_name()
-            context[context_name] = self.get_object()
+            local_context = AlternativeSingleObjectMixin.get_context_data(
+                self, object=self.get_object())
         else:
             raise NotImplementedError('Unimplemented mode: %s' % self.mode)
+
+        context.update(local_context)
         return context

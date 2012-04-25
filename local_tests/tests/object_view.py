@@ -68,13 +68,15 @@ class TestObjectMixinIntegrationWithView(TestCase):
         rf = RequestFactory()
         request = rf.get('/')
         response = view(request)
-        self.assertEqual(response.context_data.keys(),
-            ['obj1_list', 'obj2_list'])
+        self.assertEqual(
+            sorted(response.context_data.keys()),
+            sorted(['paginator', 'page_obj', 'is_paginated', 'obj1_list', 'obj2_list']))
 
     def test_context_for_list_mode(self):
         response = self.client.get('/object/')
-        self.assertEqual(response.context_data.keys(),
-            ['obj_list', 'other_list'])
+        self.assertEqual(
+            sorted(response.context_data.keys()),
+            sorted(['paginator', 'page_obj', 'is_paginated', 'obj_list', 'other_list']))
         self.assertEqual(
             [(o.id, type(o)) for o in response.context_data['obj_list']],
             [(o.id, type(o)) for o in MyObjectModel.objects.all()]
@@ -86,8 +88,9 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     def test_context_for_detail_mode(self):
         response = self.client.get('/object/1/')
-        self.assertEqual(response.context_data.keys(),
-            ['obj', 'other_list'])
+        self.assertEqual(
+            sorted(response.context_data.keys()),
+            sorted(['paginator', 'page_obj', 'is_paginated', 'obj', 'other_list']))
         self.assertEqual(
             response.context_data['obj'],
             MyObjectModel.objects.get(id=1)
