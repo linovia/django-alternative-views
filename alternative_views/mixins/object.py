@@ -1,6 +1,6 @@
 
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext as _
+# from django.utils.translation import ugettext as _
 
 from alternative_views.mixins import Mixin
 
@@ -28,8 +28,13 @@ class ObjectMixin(Mixin,
         AlternativeMultipleObjectMixin):
 
     instance_name = None
+
     model = None
     queryset = None
+
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+    pk_url_kwarg = 'pk'
 
     template_name_prefix = None
 
