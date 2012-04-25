@@ -19,8 +19,8 @@ class MyOtherObjectMixin(ObjectMixin):
 
 
 class ObjectView(View):
-    obj = MyObjectMixin()
     other = MyOtherObjectMixin(mode='list')
+    obj = MyObjectMixin()
 
 
 class SameMixinView(View):
@@ -30,5 +30,8 @@ class SameMixinView(View):
 
 urlpatterns = patterns('',
     (r'^object/$', ObjectView.as_view(mode='list')),
+    (r'^object/new/$', ObjectView.as_view(mode='new')),
     (r'^object/(?P<pk>\d+)/$', ObjectView.as_view(mode='detail')),
+    (r'^object/(?P<pk>\d+)/update/$', ObjectView.as_view(mode='update')),
+    (r'^object/(?P<pk>\d+)/delete/$', ObjectView.as_view(mode='delete')),
 )
