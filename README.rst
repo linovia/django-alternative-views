@@ -38,10 +38,10 @@ urls.py::
 
 
     urlpatterns = patterns('',
-        url(r'^project/$', ProjectView.as_list(), name='projects'),
-        url(r'^project/new/$', ProjectView.as_new(), name='new-project'),
-        url(r'^project/(?P<project_id>\d+)/$', ProjectView.as_detail(), name='project'),
-        url(r'^project/(?P<project_id>\d+)/update/$', ProjectView.as_update(), name='update-project'),
-        url(r'^project/(?P<project_id>\d+)/delete/$', ProjectView.as_delete(), name='delete-project'),
+        url(r'^project/$', ProjectView.as_view('list'), name='projects'),
+        url(r'^project/new/$', ProjectView.as_view('new'), name='new-project'),
+        url(r'^project/(?P<project_id>\d+)/$', ProjectView.as_view('detail'), name='project'),
+        url(r'^project/(?P<project_id>\d+)/update/$', ProjectView.as_view('update'), name='update-project'),
+        url(r'^project/(?P<project_id>\d+)/delete/$', ProjectView.as_view('delete'), name='delete-project'),
     )
 
