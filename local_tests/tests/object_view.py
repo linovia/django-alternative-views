@@ -108,14 +108,3 @@ class TestObjectMixinIntegrationWithView(TestCase):
         response = self.client.get('/object/new/')
         self.assertTemplateUsed(response=response,
             template_name='local_tests/obj_new.html')
-        self.assertEqual(
-            sorted(response.context_data.keys()),
-            sorted(['paginator', 'page_obj', 'is_paginated', 'obj', 'other_list']))
-        self.assertEqual(
-            response.context_data['obj'],
-            MyObjectModel.objects.get(id=1)
-        )
-        self.assertEqual(
-            [(o.id, type(o)) for o in response.context_data['other_list']],
-            [(o.id, type(o)) for o in MyOtherObjectModel.objects.all()]
-        )

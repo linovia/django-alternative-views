@@ -97,6 +97,8 @@ class ObjectMixin(Mixin,
         elif self.mode == 'detail':
             local_context = AlternativeSingleObjectMixin.get_context_data(
                 self, object=self.get_object())
+        elif self.mode == 'new':
+            local_context = {}
         else:
             raise NotImplementedError('Unimplemented mode: %s' % self.mode)
 
