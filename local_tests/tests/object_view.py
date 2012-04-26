@@ -74,6 +74,8 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     def test_context_for_list_mode(self):
         response = self.client.get('/object/')
+        self.assertTemplateUsed(response=response,
+            template_name='local_tests/obj_list.html')
         self.assertEqual(
             sorted(response.context_data.keys()),
             sorted(['paginator', 'page_obj', 'is_paginated', 'obj_list', 'other_list']))
@@ -88,6 +90,24 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     def test_context_for_detail_mode(self):
         response = self.client.get('/object/1/')
+        self.assertTemplateUsed(response=response,
+            template_name='local_tests/obj_detail.html')
+        self.assertEqual(
+            sorted(response.context_data.keys()),
+            sorted(['paginator', 'page_obj', 'is_paginated', 'obj', 'other_list']))
+        self.assertEqual(
+            response.context_data['obj'],
+            MyObjectModel.objects.get(id=1)
+        )
+        self.assertEqual(
+            [(o.id, type(o)) for o in response.context_data['other_list']],
+            [(o.id, type(o)) for o in MyOtherObjectModel.objects.all()]
+        )
+
+    def test_context_for_new_mode(self):
+        response = self.client.get('/object/new/')
+        self.assertTemplateUsed(response=response,
+            template_name='local_tests/obj_new.html')
         self.assertEqual(
             sorted(response.context_data.keys()),
             sorted(['paginator', 'page_obj', 'is_paginated', 'obj', 'other_list']))
