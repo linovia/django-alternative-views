@@ -1,11 +1,13 @@
 
 from django.core.exceptions import ImproperlyConfigured
 # from django.utils.translation import ugettext as _
+from django.http import HttpResponseRedirect
 
 from alternative_views.mixins import Mixin
 
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import MultipleObjectMixin
+from django.views.generic.edit import ModelFormMixin
 
 
 class AlternativeSingleObjectMixin(SingleObjectMixin):
@@ -23,9 +25,19 @@ class AlternativeMultipleObjectMixin(MultipleObjectMixin):
     pass
 
 
+class AlternativeModelFormMixin(ModelFormMixin):
+    def form_invalid(self, form):
+        return self.get_context_data(form=form)
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return
+
+
 class ObjectMixin(Mixin,
         AlternativeSingleObjectMixin,
-        AlternativeMultipleObjectMixin):
+        AlternativeMultipleObjectMixin,
+        AlternativeModelFormMixin):
 
     instance_name = None
 
@@ -84,6 +96,7 @@ class ObjectMixin(Mixin,
         """
         Builds a context for this mixin.
         """
+        self.request = request
         context = super(ObjectMixin, self).get_context(
             request, context, permissions, **kwargs)
         local_context = {}
@@ -97,10 +110,30 @@ class ObjectMixin(Mixin,
         elif self.mode == 'detail':
             local_context = AlternativeSingleObjectMixin.get_context_data(
                 self, object=self.get_object())
+
         elif self.mode == 'new':
-            local_context = {}
+            self.object = None
+            form_class = self.get_form_class()
+            form = self.get_form(form_class)
+            self.form = form
+            if request.method in ('POST', 'PUT'):
+                if form.is_valid():
+                    local_context = self.form_valid(form)
+                else:
+                    local_context = self.form_invalid(form)
+            else:
+                local_context = AlternativeModelFormMixin.get_context_data(self, form=form)
+                local_context['%s_form' % self.get_object_name()] = local_context['form']
+                del local_context['form']
+
         else:
             raise NotImplementedError('Unimplemented mode: %s' % self.mode)
 
         context.update(local_context)
         return context
+
+    def process(self, request, context, **kwargs):
+        if self.mode == 'new':
+            if self.form.is_valid():
+                return HttpResponseRedirect(self.get_success_url())
+        return super(ObjectMixin, self).process(request, context, **kwargs)

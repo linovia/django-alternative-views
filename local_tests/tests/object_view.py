@@ -108,3 +108,5 @@ class TestObjectMixinIntegrationWithView(TestCase):
         response = self.client.get('/object/new/')
         self.assertTemplateUsed(response=response,
             template_name='local_tests/obj_new.html')
+        self.assertTrue('obj_form' in response.context_data)
+        self.assertTrue(response.context_data['obj_form'])
