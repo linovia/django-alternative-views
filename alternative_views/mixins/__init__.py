@@ -33,6 +33,12 @@ class Mixin(BaseMixin):
         if not self.mode:
             self.mode = mode
 
+    def as_mode(self, mode):
+        """
+        Allows to specialize this instance according to the mode.
+        """
+        self.mode = mode
+
     def authorization(self, request, context):
         """
         Returns True if the user has enough rights for this request,
@@ -48,6 +54,9 @@ class Mixin(BaseMixin):
         if permissions is not None:
             permissions[self.instance_name] = permission
         if permission is True or permission is None:
+            parent = super(Mixin, self)
+            if hasattr(parent, 'get_context'):
+                context = parent.get_context(request, context, permissions, **kwargs)
             return context
         raise PermissionDenied()
 

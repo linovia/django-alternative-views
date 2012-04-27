@@ -64,18 +64,17 @@ class View(object):
     default_security = 'allow'
 
     def __init__(self, *args, **kwargs):
-        self.base_mixins = copy.deepcopy(self.base_mixins)
-        self.mixins = copy.copy(self.base_mixins)
         self.contributed = {}
         self.mode = kwargs.get('mode', None)
         self.context = {}
-        # Move the mixins and duplicate them
-        for name, mixin in self.base_mixins.iteritems():
+        # Setup the mixins
+        self.mixins = copy.deepcopy(self.base_mixins)
+        for name, mixin in self.mixins.iteritems():
             mixin.instance_name = name
             mixin.args = copy.deepcopy(args)
             mixin.kwargs = copy.deepcopy(kwargs)
-            if not mixin.mode:
-                mixin.mode = self.mode
+            mode = mixin.mode or self.mode
+            mixin.as_mode(mode)
 
     @classonlymethod
     def as_view(cls, **initkwargs):

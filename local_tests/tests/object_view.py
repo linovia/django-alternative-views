@@ -48,6 +48,23 @@ class TestObjectMixin(TestCase):
             'local_tests/myobjectmodel_detail.html',
         ])
 
+    def test_as_mode(self):
+        mixin = MyObjectMixin()
+        mixin.as_mode('list')
+        from alternative_views.mixins.object import AlternativeMultipleObjectMixin
+        self.assertTrue(isinstance(mixin, MyObjectMixin))
+        self.assertTrue(isinstance(mixin, AlternativeMultipleObjectMixin))
+
+
+class TestObjectListMixin(TestCase):
+
+    def test_context(self):
+        mixin = MyObjectMixin()
+        mixin.as_mode('list')
+        rf = RequestFactory()
+        request = rf.get('/')
+        response = mixin.get_context(request)
+
 
 class TestObjectMixinIntegrationWithView(TestCase):
 

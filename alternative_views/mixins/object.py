@@ -11,6 +11,12 @@ from django.views.generic.edit import ModelFormMixin
 
 
 class AlternativeSingleObjectMixin(SingleObjectMixin):
+    """
+    The detail mixin
+    """
+    def get_context_object_name(self, *args, **kwargs):
+        return self.get_object_name(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = {}
         obj = kwargs.pop('object')
@@ -20,12 +26,52 @@ class AlternativeSingleObjectMixin(SingleObjectMixin):
         context.update(kwargs)
         return context
 
+    def get_context(self, request, context, permissions, **kwargs):
+        """
+        Builds a context for this mixin.
+        """
+        self.object = self.get_object()
+        ctx = super(AlternativeSingleObjectMixin, self).get_context_data(
+            object=self.get_object())
+        del ctx['object']
+        context.update(ctx)
+        return context
+
 
 class AlternativeMultipleObjectMixin(MultipleObjectMixin):
-    pass
+    def get_context_object_name(self, *args, **kwargs):
+        return '%s_list' % self.get_object_name(*args, **kwargs)
+
+    def get_context(self, request, context, permissions, **kwargs):
+        ctx = super(AlternativeMultipleObjectMixin, self).get_context_data(
+            object_list=self.get_queryset())
+        # Sanitize the context names
+        del ctx['object_list']
+        context.update(ctx)
+        return context
 
 
 class AlternativeModelFormMixin(ModelFormMixin):
+    def get_context_object_name(self, *args, **kwargs):
+        return self.get_object_name(*args, **kwargs)
+
+    def get_context(self, request, context, permissions, **kwargs):
+        self.object = None
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        self.form = form
+        if request.method in ('POST', 'PUT'):
+            if form.is_valid():
+                local_context = self.form_valid(form)
+            else:
+                local_context = self.form_invalid(form)
+        else:
+            local_context = AlternativeModelFormMixin.get_context_data(self, form=form)
+            local_context['%s_form' % self.get_object_name()] = local_context['form']
+            del local_context['form']
+        context.update(local_context)
+        return context
+
     def form_invalid(self, form):
         return self.get_context_data(form=form)
 
@@ -34,11 +80,7 @@ class AlternativeModelFormMixin(ModelFormMixin):
         return
 
 
-class ObjectMixin(Mixin,
-        AlternativeSingleObjectMixin,
-        AlternativeMultipleObjectMixin,
-        AlternativeModelFormMixin):
-
+class ObjectMixin(Mixin):
     instance_name = None
 
     model = None
@@ -50,38 +92,31 @@ class ObjectMixin(Mixin,
 
     template_name_prefix = None
 
+    form = None
+
     MODE_HERITAGE = {
         'list': AlternativeMultipleObjectMixin,
         'detail': AlternativeSingleObjectMixin,
         'new': AlternativeModelFormMixin,
     }
 
-    def set_mode(self, mode):
-        pass
-
-    def __getattr__(self, name):
+    def as_mode(self, mode):
         """
-        Define the __getattr__ so that is acts as a proxy
+        Live update the instance to make a different heritage according to the
+        mode.
         """
-        if self.mode not in self.MODE_HERITAGE:
-            raise AttributeError("ObjectMixin instance has no attribute '%s'" % name)
-        return getattr(self.MODE_HERITAGE[self.mode], name)
+        super(ObjectMixin, self).as_mode(mode)
+        if mode in self.MODE_HERITAGE:
+            cls_name = "%s%s" % (mode.capitalize(), self.__class__.__name__)
+            heritage = (self.__class__, self.MODE_HERITAGE[mode])
+            cls = type(cls_name, heritage, {})
+            self.__class__ = cls
 
     def get_object_name(self, *args, **kwargs):
         """
         Return a short name for the object.
         """
         return self.instance_name
-
-    def get_context_object_name(self, *args, **kwargs):
-        """
-        Returns the instance name.
-        Overrides the function from django's generic views.
-        """
-        name = self.get_object_name(*args, **kwargs)
-        if self.mode == 'list':
-            return '%s_list' % (name,)
-        return name
 
     def get_template_names(self):
         """
@@ -114,39 +149,8 @@ class ObjectMixin(Mixin,
         Builds a context for this mixin.
         """
         self.request = request
-        context = super(ObjectMixin, self).get_context(
-            request, context, permissions, **kwargs)
-        local_context = {}
-
-        if self.mode == 'list':
-            local_context = AlternativeMultipleObjectMixin.get_context_data(
-                self, object_list=self.get_queryset())
-            # Sanitize the context names
-            del local_context['object_list']
-
-        elif self.mode == 'detail':
-            local_context = AlternativeSingleObjectMixin.get_context_data(
-                self, object=self.get_object())
-
-        elif self.mode == 'new':
-            self.object = None
-            form_class = self.get_form_class()
-            form = self.get_form(form_class)
-            self.form = form
-            if request.method in ('POST', 'PUT'):
-                if form.is_valid():
-                    local_context = self.form_valid(form)
-                else:
-                    local_context = self.form_invalid(form)
-            else:
-                local_context = AlternativeModelFormMixin.get_context_data(self, form=form)
-                local_context['%s_form' % self.get_object_name()] = local_context['form']
-                del local_context['form']
-
-        else:
-            raise NotImplementedError('Unimplemented mode: %s' % self.mode)
-
-        context.update(local_context)
+        context.update(super(ObjectMixin, self).get_context(
+            request, context, permissions, **kwargs))
         return context
 
     def process(self, request, context, **kwargs):
