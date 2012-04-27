@@ -50,6 +50,23 @@ class ObjectMixin(Mixin,
 
     template_name_prefix = None
 
+    MODE_HERITAGE = {
+        'list': AlternativeMultipleObjectMixin,
+        'detail': AlternativeSingleObjectMixin,
+        'new': AlternativeModelFormMixin,
+    }
+
+    def set_mode(self, mode):
+        pass
+
+    def __getattr__(self, name):
+        """
+        Define the __getattr__ so that is acts as a proxy
+        """
+        if self.mode not in self.MODE_HERITAGE:
+            raise AttributeError("ObjectMixin instance has no attribute '%s'" % name)
+        return getattr(self.MODE_HERITAGE[self.mode], name)
+
     def get_object_name(self, *args, **kwargs):
         """
         Return a short name for the object.
