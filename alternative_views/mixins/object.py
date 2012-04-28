@@ -31,9 +31,7 @@ class AlternativeSingleObjectMixin(SingleObjectMixin):
         Builds a context for this mixin.
         """
         self.object = self.get_object()
-        ctx = super(AlternativeSingleObjectMixin, self).get_context_data(
-            object=self.get_object())
-        del ctx['object']
+        ctx = self.get_context_data(object=self.get_object())
         context.update(ctx)
         return context
 
