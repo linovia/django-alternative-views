@@ -92,7 +92,7 @@ class ObjectMixin(Mixin):
 
     form = None
 
-    MODE_HERITAGE = {
+    HERITAGE_PER_MODE = {
         'list': AlternativeMultipleObjectMixin,
         'detail': AlternativeSingleObjectMixin,
         'new': AlternativeModelFormMixin,
@@ -104,9 +104,9 @@ class ObjectMixin(Mixin):
         mode.
         """
         super(ObjectMixin, self).as_mode(mode)
-        if mode in self.MODE_HERITAGE:
+        if mode in self.HERITAGE_PER_MODE:
             cls_name = "%s%s" % (mode.capitalize(), self.__class__.__name__)
-            heritage = (self.__class__, self.MODE_HERITAGE[mode])
+            heritage = (self.__class__, self.HERITAGE_PER_MODE[mode])
             cls = type(cls_name, heritage, {})
             self.__class__ = cls
 
