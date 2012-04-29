@@ -142,7 +142,7 @@ class ObjectMixin(Mixin):
             ))
         return names
 
-    def get_context(self, request, context, permissions, **kwargs):
+    def get_context(self, request, context, permissions=None, **kwargs):
         """
         Builds a context for this mixin.
         """
