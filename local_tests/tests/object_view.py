@@ -60,10 +60,20 @@ class TestObjectListMixin(TestCase):
 
     def test_context(self):
         mixin = MyObjectMixin()
+        mixin.instance_name = 'mixin_object'
         mixin.as_mode('list')
         rf = RequestFactory()
         request = rf.get('/')
-        response = mixin.get_context(request)
+        context = mixin.get_context(request, {})
+        # QuerySet -> List to try to compare in the assert.
+        context['mixin_object_list'] = list(context['mixin_object_list'])
+        expected = {
+            'is_paginated': False,
+            'mixin_object_list': list(MyObjectModel.objects.all()),
+            'page_obj': None,
+            'paginator': None,
+        }
+        self.assertEqual(expected, context)
 
 
 class TestObjectMixinIntegrationWithView(TestCase):
