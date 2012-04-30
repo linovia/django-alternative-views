@@ -37,21 +37,26 @@ class AlternativeSingleObjectMixin(SingleObjectMixin):
 
 
 class AlternativeMultipleObjectMixin(MultipleObjectMixin):
+    """
+    The list mixin
+    """
     def get_context_object_name(self, *args, **kwargs):
         return '%s_list' % self.get_object_name(*args, **kwargs)
 
     def get_context(self, request, context, permissions, **kwargs):
-        ctx = super(AlternativeMultipleObjectMixin, self).get_context_data(
-            object_list=self.get_queryset())
+        ctx = self.get_context_data(object_list=self.get_queryset())
+
         # Sanitize the context names
         del ctx['object_list']
         context.update(ctx)
         return context
 
 
-class AlternativeModelFormMixin(ModelFormMixin):
+class AlternativeBaseModelFormMixin(ModelFormMixin):
+    """
+    The model form mixin
+    """
     def get_context(self, request, context, permissions, **kwargs):
-        self.object = None
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         self.form = form
@@ -61,7 +66,7 @@ class AlternativeModelFormMixin(ModelFormMixin):
             else:
                 local_context = self.form_invalid(form)
         else:
-            local_context = AlternativeModelFormMixin.get_context_data(self, form=form)
+            local_context = self.get_context_data(form=form)
         # Hack to work around the default generic view name
         if 'form' in local_context:
             local_context['%s_form' % self.get_object_name()] = local_context['form']
@@ -75,6 +80,26 @@ class AlternativeModelFormMixin(ModelFormMixin):
     def form_valid(self, form):
         self.object = form.save()
         return {}
+
+
+class AlternativeNewModelFormMixin(AlternativeBaseModelFormMixin):
+    """
+    The new model mixin
+    """
+    def get_context(self, request, context, permissions, **kwargs):
+        self.object = None
+        return super(AlternativeNewModelFormMixin, self).get_context(
+            request, context, permissions, **kwargs)
+
+
+class AlternativeUpdateModelFormMixin(AlternativeBaseModelFormMixin):
+    """
+    The new model mixin
+    """
+    def get_context(self, request, context, permissions, **kwargs):
+        self.object = self.get_object()
+        return super(AlternativeUpdateModelFormMixin, self).get_context(
+            request, context, permissions, **kwargs)
 
 
 class ObjectMixin(Mixin):
@@ -94,7 +119,8 @@ class ObjectMixin(Mixin):
     HERITAGE_PER_MODE = {
         'list': AlternativeMultipleObjectMixin,
         'detail': AlternativeSingleObjectMixin,
-        'new': AlternativeModelFormMixin,
+        'new': AlternativeNewModelFormMixin,
+        'update': AlternativeUpdateModelFormMixin,
     }
 
     def as_mode(self, mode):
@@ -103,11 +129,12 @@ class ObjectMixin(Mixin):
         mode.
         """
         super(ObjectMixin, self).as_mode(mode)
-        if mode in self.HERITAGE_PER_MODE:
-            cls_name = "%s%s" % (mode.capitalize(), self.__class__.__name__)
-            heritage = (self.__class__, self.HERITAGE_PER_MODE[mode])
-            cls = type(cls_name, heritage, {})
-            self.__class__ = cls
+        if not mode in self.HERITAGE_PER_MODE:
+            raise NotImplementedError('Unknown mode: %s' % mode)
+        cls_name = "%s%s" % (mode.capitalize(), self.__class__.__name__)
+        heritage = (self.__class__, self.HERITAGE_PER_MODE[mode])
+        cls = type(cls_name, heritage, {})
+        self.__class__ = cls
 
     def get_object_name(self, *args, **kwargs):
         """
@@ -151,7 +178,8 @@ class ObjectMixin(Mixin):
         return context
 
     def process(self, request, context, **kwargs):
-        if self.mode == 'new':
-            if self.form.is_valid():
-                return HttpResponseRedirect(self.get_success_url())
+        if self.mode == 'new' and self.form.is_valid():
+            return HttpResponseRedirect(self.get_success_url())
+        if self.mode == 'update' and self.form.is_valid():
+            return HttpResponseRedirect(self.get_success_url())
         return super(ObjectMixin, self).process(request, context, **kwargs)

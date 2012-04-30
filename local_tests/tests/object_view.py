@@ -169,3 +169,34 @@ class TestObjectMixinIntegrationWithView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(initial_nr, MyObjectModel.objects.count())
         self.assertFormError(response, 'obj_form', 'slug', u'This field is required.')
+
+    #
+    # Edit mode
+    #
+
+    def test_context_for_edit_mode(self):
+        response = self.client.get('/object/1/update/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response=response,
+            template_name='local_tests/obj_update.html')
+        self.assertTrue('obj_form' in response.context_data)
+        self.assertTrue(response.context_data['obj_form'])
+
+    def test_object_update(self):
+        instance = MyObjectModel.objects.get(id=1)
+        self.assertEqual(instance.slug, 'test')
+        response = self.client.post('/object/1/update/', {
+            'slug': 'demo',
+        })
+        instance = MyObjectModel.objects.get(id=1)
+        self.assertEqual(instance.slug, 'demo')
+        self.assertRedirects(response, instance.get_absolute_url())
+
+    def test_object_update_failure(self):
+        instance = MyObjectModel.objects.get(id=1)
+        self.assertEqual(instance.slug, 'test')
+        response = self.client.post('/object/1/update/', {})
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'obj_form', 'slug', u'This field is required.')
+        instance = MyObjectModel.objects.get(id=1)
+        self.assertEqual(instance.slug, 'test')
