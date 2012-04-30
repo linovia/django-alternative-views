@@ -50,9 +50,6 @@ class AlternativeMultipleObjectMixin(MultipleObjectMixin):
 
 
 class AlternativeModelFormMixin(ModelFormMixin):
-    def get_context_object_name(self, *args, **kwargs):
-        return self.get_object_name(*args, **kwargs)
-
     def get_context(self, request, context, permissions, **kwargs):
         self.object = None
         form_class = self.get_form_class()
