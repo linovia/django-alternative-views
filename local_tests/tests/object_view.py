@@ -99,6 +99,10 @@ class TestObjectMixinIntegrationWithView(TestCase):
             sorted(response.context_data.keys()),
             sorted(['paginator', 'page_obj', 'is_paginated', 'obj1_list', 'obj2_list']))
 
+    #
+    # List mode
+    #
+
     def test_context_for_list_mode(self):
         response = self.client.get('/object/')
         self.assertEqual(response.status_code, 200)
@@ -115,6 +119,10 @@ class TestObjectMixinIntegrationWithView(TestCase):
             [(o.id, type(o)) for o in response.context_data['other_list']],
             [(o.id, type(o)) for o in MyOtherObjectModel.objects.all()]
         )
+
+    #
+    # Detail mode
+    #
 
     def test_context_for_detail_mode(self):
         response = self.client.get('/object/1/')
@@ -133,6 +141,10 @@ class TestObjectMixinIntegrationWithView(TestCase):
             [(o.id, type(o)) for o in MyOtherObjectModel.objects.all()]
         )
 
+    #
+    # New mode
+    #
+
     def test_context_for_new_mode(self):
         response = self.client.get('/object/new/')
         self.assertEqual(response.status_code, 200)
@@ -146,7 +158,14 @@ class TestObjectMixinIntegrationWithView(TestCase):
         response = self.client.post('/object/new/', {
             'slug': 'demo',
         })
-        self.assertEqual(response.status_code, 302)
         self.assertEqual(initial_nr + 1, MyObjectModel.objects.count())
         instance = MyObjectModel.objects.all().order_by('-id')[0]
         self.assertEqual(instance.slug, 'demo')
+        self.assertRedirects(response, instance.get_absolute_url())
+
+    def test_object_creation_failure(self):
+        initial_nr = MyObjectModel.objects.count()
+        response = self.client.post('/object/new/', {})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(initial_nr, MyObjectModel.objects.count())
+        self.assertFormError(response, 'obj_form', 'slug', u'This field is required.')
