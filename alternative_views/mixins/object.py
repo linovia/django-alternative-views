@@ -62,6 +62,8 @@ class AlternativeModelFormMixin(ModelFormMixin):
                 local_context = self.form_invalid(form)
         else:
             local_context = AlternativeModelFormMixin.get_context_data(self, form=form)
+        # Hack to work around the default generic view name
+        if 'form' in local_context:
             local_context['%s_form' % self.get_object_name()] = local_context['form']
             del local_context['form']
         context.update(local_context)
