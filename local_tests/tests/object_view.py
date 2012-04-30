@@ -140,3 +140,9 @@ class TestObjectMixinIntegrationWithView(TestCase):
             template_name='local_tests/obj_new.html')
         self.assertTrue('obj_form' in response.context_data)
         self.assertTrue(response.context_data['obj_form'])
+
+    def test_object_creation(self):
+        response = self.client.post('/object/new/', {
+            'slug': 'demo',
+        })
+        self.assertEqual(response.status_code, 302)

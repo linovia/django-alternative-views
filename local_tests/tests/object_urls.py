@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from django.conf.urls import patterns
+from django.core.urlresolvers import reverse
 
 from alternative_views.base import View
 from alternative_views.mixins.object import ObjectMixin
@@ -10,6 +11,10 @@ from ..models import MyObjectModel, MyOtherObjectModel
 
 class MyObjectMixin(ObjectMixin):
     model = MyObjectModel
+
+    def get_success_url(self):
+        return '/object/3/'
+        return reverse('detail', kwargs={'pk': self.object.id})
 
 
 class MyOtherObjectMixin(ObjectMixin):

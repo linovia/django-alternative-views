@@ -75,7 +75,7 @@ class AlternativeModelFormMixin(ModelFormMixin):
 
     def form_valid(self, form):
         self.object = form.save()
-        return
+        return {}
 
 
 class ObjectMixin(Mixin):
