@@ -1,9 +1,10 @@
 """
-
+Tests the Mixins permissions.
 """
 
-from django.test import RequestFactory
+from django.core.exceptions import ImproperlyConfigured
 
+from django.test import RequestFactory
 from django.test import TestCase
 
 from alternative_views.mixins import Mixin
@@ -19,8 +20,11 @@ class MyMixin2(Mixin):
 
 
 class ForbiddenMixin(Mixin):
+
+    RESPONSE_CODE = False
+
     def authorization(self, request, context, **kwargs):
-        return False
+        return self.RESPONSE_CODE
 
 
 class ForbiddenView(View):
@@ -37,4 +41,12 @@ class TestAuthorization(TestCase):
         rf = RequestFactory()
         request = rf.get('/')
         with self.assertRaises(PermissionDenied):
+            view.dispatch(request)
+
+        view.mixins['forbidden'].RESPONSE_CODE = True
+        with self.assertRaises(ImproperlyConfigured):
+            view.dispatch(request)
+
+        view.mixins['forbidden'].RESPONSE_CODE = None
+        with self.assertRaises(ImproperlyConfigured):
             view.dispatch(request)
