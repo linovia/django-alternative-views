@@ -101,6 +101,7 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     def test_context_for_list_mode(self):
         response = self.client.get('/object/')
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response=response,
             template_name='local_tests/obj_list.html')
         self.assertEqual(
@@ -117,6 +118,7 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     def test_context_for_detail_mode(self):
         response = self.client.get('/object/1/')
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response=response,
             template_name='local_tests/obj_detail.html')
         self.assertEqual(
@@ -133,6 +135,7 @@ class TestObjectMixinIntegrationWithView(TestCase):
 
     def test_context_for_new_mode(self):
         response = self.client.get('/object/new/')
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response=response,
             template_name='local_tests/obj_new.html')
         self.assertTrue('obj_form' in response.context_data)
