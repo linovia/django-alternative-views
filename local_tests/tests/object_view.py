@@ -142,7 +142,11 @@ class TestObjectMixinIntegrationWithView(TestCase):
         self.assertTrue(response.context_data['obj_form'])
 
     def test_object_creation(self):
+        initial_nr = MyObjectModel.objects.count()
         response = self.client.post('/object/new/', {
             'slug': 'demo',
         })
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(initial_nr + 1, MyObjectModel.objects.count())
+        instance = MyObjectModel.objects.all().order_by('-id')[0]
+        self.assertEqual(instance.slug, 'demo')

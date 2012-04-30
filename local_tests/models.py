@@ -11,6 +11,10 @@ class MyObjectModel(models.Model):
     def __unicode__(self):
         return u'%i' % (self.id,)
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('object_detail', (), {'pk': self.id})
+
 
 class MyOtherObjectModel(models.Model):
     class Meta:

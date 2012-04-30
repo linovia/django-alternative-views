@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
-from django.conf.urls import patterns
-from django.core.urlresolvers import reverse
+from django.conf.urls import patterns, url
 
 from alternative_views.base import View
 from alternative_views.mixins.object import ObjectMixin
@@ -11,10 +10,6 @@ from ..models import MyObjectModel, MyOtherObjectModel
 
 class MyObjectMixin(ObjectMixin):
     model = MyObjectModel
-
-    def get_success_url(self):
-        return '/object/3/'
-        return reverse('detail', kwargs={'pk': self.object.id})
 
 
 class MyOtherObjectMixin(ObjectMixin):
@@ -32,9 +27,9 @@ class SameMixinView(View):
 
 
 urlpatterns = patterns('',
-    (r'^object/$', ObjectView.as_view(mode='list')),
-    (r'^object/new/$', ObjectView.as_view(mode='new')),
-    (r'^object/(?P<pk>\d+)/$', ObjectView.as_view(mode='detail')),
-    (r'^object/(?P<pk>\d+)/update/$', ObjectView.as_view(mode='update')),
-    (r'^object/(?P<pk>\d+)/delete/$', ObjectView.as_view(mode='delete')),
+    url(r'^object/$', ObjectView.as_view(mode='list'), name='object_list'),
+    url(r'^object/new/$', ObjectView.as_view(mode='new'), name='object_new'),
+    url(r'^object/(?P<pk>\d+)/$', ObjectView.as_view(mode='detail'), name='object_detail'),
+    url(r'^object/(?P<pk>\d+)/update/$', ObjectView.as_view(mode='update'), name='object_update'),
+    url(r'^object/(?P<pk>\d+)/delete/$', ObjectView.as_view(mode='delete'), name='object_delete'),
 )
