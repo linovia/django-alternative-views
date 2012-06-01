@@ -5,7 +5,7 @@ Django alternative views
    :alt: Build Status
    :target: http://travis-ci.org/linovia/django-alternative-views
 
-This is work in progress and shouldn't be used yet.
+This is work in progress and early stage.
 
 This package provides an alternative implementation of Django generic
 class based views.
@@ -14,8 +14,37 @@ It is aimed to be much more reusable and should cover a wider set of use
 cases.
 
 
-Target
-------
+Do not repeat yourself
+----------------------
+
+You should be able to define one Mixin for a given model ou set of data. You
+shouldn't need to write list + detail + create + update + delete view for every
+data set. Just write one Mixin for that set, include it in the views and you're
+done.
+
+
+Chain mixins
+------------
+
+I want to have an unlimited number of random data in my views. This includes
+lists, specific instances, forms, creation or updates of objects...
+
+
+Modular authorization
+---------------------
+
+Each mixin should be able to grant, deny or don't answer the access
+authorization either for itself or for the all view.
+
+For example, on a bugtracker, if I want give a user the right to view anything
+relating to a project on which he has the rights, then I write that
+authorization code in the ProjectMixin. The user will then be able to
+access any view that includes the ProjectMixin provided that no other view's
+Mixin has denied him that right.
+
+
+Example
+-------
 
 views.py::
 
