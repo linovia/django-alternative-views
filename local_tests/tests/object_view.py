@@ -51,9 +51,9 @@ class TestObjectMixin(TestCase):
     def test_as_mode(self):
         mixin = MyObjectMixin()
         mixin.as_mode('list')
-        from alternative_views.mixins.object import AlternativeMultipleObjectMixin
+        from alternative_views.mixins.object.list import MultipleObjectMixin
         self.assertTrue(isinstance(mixin, MyObjectMixin))
-        self.assertTrue(isinstance(mixin, AlternativeMultipleObjectMixin))
+        self.assertTrue(isinstance(mixin, MultipleObjectMixin))
 
 
 class TestObjectListMixin(TestCase):

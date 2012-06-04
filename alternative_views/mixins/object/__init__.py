@@ -10,46 +10,20 @@ from .list import MultipleObjectMixin
 from .edit import ModelFormMixin
 
 
-class AlternativeSingleObjectMixin(SingleObjectMixin):
-    """
-    The detail mixin
-    """
-    def get_context_object_name(self, *args, **kwargs):
-        return self.get_object_name(*args, **kwargs)
+# class AlternativeMultipleObjectMixin(MultipleObjectMixin):
+#     """
+#     The list mixin
+#     """
+#     def get_context_object_name(self, *args, **kwargs):
+#         return '%s_list' % self.get_object_name(*args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = {}
-        obj = kwargs.pop('object')
-        context_object_name = self.get_context_object_name(obj)
-        if context_object_name:
-            context[context_object_name] = obj
-        context.update(kwargs)
-        return context
+#     def get_context(self, request, context, permissions, **kwargs):
+#         ctx = self.get_context_data(object_list=self.get_queryset())
 
-    def get_context(self, request, context, permissions, **kwargs):
-        """
-        Builds a context for this mixin.
-        """
-        self.object = self.get_object()
-        ctx = self.get_context_data(object=self.get_object())
-        context.update(ctx)
-        return context
-
-
-class AlternativeMultipleObjectMixin(MultipleObjectMixin):
-    """
-    The list mixin
-    """
-    def get_context_object_name(self, *args, **kwargs):
-        return '%s_list' % self.get_object_name(*args, **kwargs)
-
-    def get_context(self, request, context, permissions, **kwargs):
-        ctx = self.get_context_data(object_list=self.get_queryset())
-
-        # Sanitize the context names
-        del ctx['object_list']
-        context.update(ctx)
-        return context
+#         # Sanitize the context names
+#         del ctx['object_list']
+#         context.update(ctx)
+#         return context
 
 
 class AlternativeBaseModelFormMixin(ModelFormMixin):
@@ -115,8 +89,8 @@ class ObjectMixin(Mixin):
     form = None
 
     HERITAGE_PER_MODE = {
-        'list': AlternativeMultipleObjectMixin,
-        'detail': AlternativeSingleObjectMixin,
+        'list': MultipleObjectMixin,
+        'detail': SingleObjectMixin,
         'new': AlternativeNewModelFormMixin,
         'update': AlternativeUpdateModelFormMixin,
     }

@@ -75,7 +75,7 @@ class MultipleObjectMixin(ContextMixin):
         Get the name of the item to be used in the context.
         """
         if self.context_object_name:
-            return self.context_object_name
+            return '%s_list' % self.get_object_name()
         elif hasattr(object_list, 'model'):
             return smart_str('%s_list' % object_list.model._meta.object_name.lower())
         else:
@@ -85,28 +85,34 @@ class MultipleObjectMixin(ContextMixin):
         """
         Get the context for this view.
         """
-        queryset = kwargs.pop('object_list')
+        queryset = self.get_queryset()
         page_size = self.get_paginate_by(queryset)
         context_object_name = self.get_context_object_name(queryset)
         if page_size:
-            paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
+            paginator, page, queryset, is_paginated = self.paginate_queryset(
+                queryset, page_size)
             context = {
                 'paginator': paginator,
                 'page_obj': page,
                 'is_paginated': is_paginated,
-                'object_list': queryset
+                context_object_name: queryset
             }
         else:
             context = {
                 'paginator': None,
                 'page_obj': None,
                 'is_paginated': False,
-                'object_list': queryset
+                context_object_name: queryset
             }
-        if context_object_name is not None:
-            context[context_object_name] = queryset
+
         context.update(kwargs)
         return super(MultipleObjectMixin, self).get_context_data(**context)
+
+    def get_context(self, request, context, permissions, **kwargs):
+        ctx = self.get_context_data()
+        context.update(ctx)
+        return context
+
 
 
 class BaseListView(MultipleObjectMixin, View):

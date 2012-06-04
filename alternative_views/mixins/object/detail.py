@@ -93,11 +93,20 @@ class SingleObjectMixin(ContextMixin):
         context.update(kwargs)
         return super(SingleObjectMixin, self).get_context_data(**context)
 
+    def get_context(self, request, context, permissions, **kwargs):
+        """
+        Builds a context for this mixin.
+        """
+        self.object = self.get_object()
+        ctx = self.get_context_data()
+        context.update(ctx)
+        return context
+
 
 class BaseDetailView(SingleObjectMixin, View):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
+        context = self.get_context_data()
         return self.render_to_response(context)
 
 
