@@ -94,7 +94,7 @@ class AlternativeNewModelFormMixin(AlternativeBaseModelFormMixin):
 
 class AlternativeUpdateModelFormMixin(AlternativeBaseModelFormMixin):
     """
-    The new model mixin
+    The update model mixin
     """
     def get_context(self, request, context, permissions, **kwargs):
         self.object = self.get_object()
