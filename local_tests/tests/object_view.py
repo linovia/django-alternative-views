@@ -68,10 +68,10 @@ class TestObjectListMixin(TestCase):
         # QuerySet -> List to try to compare in the assert.
         context['mixin_object_list'] = list(context['mixin_object_list'])
         expected = {
-            'is_paginated': False,
+            'mixin_object_is_paginated': False,
             'mixin_object_list': list(MyObjectModel.objects.all()),
-            'page_obj': None,
-            'paginator': None,
+            'mixin_object_page_obj': None,
+            'mixin_object_paginator': None,
         }
         self.assertEqual(expected, context)
 
@@ -97,7 +97,10 @@ class TestObjectMixinIntegrationWithView(TestCase):
         response = view(request)
         self.assertEqual(
             sorted(response.context_data.keys()),
-            sorted(['paginator', 'page_obj', 'is_paginated', 'obj1_list', 'obj2_list']))
+            sorted([
+                'obj1_paginator', 'obj1_page_obj', 'obj1_is_paginated', 'obj1_list',
+                'obj2_paginator', 'obj2_page_obj', 'obj2_is_paginated', 'obj2_list'
+            ]))
 
     #
     # List mode
@@ -110,7 +113,10 @@ class TestObjectMixinIntegrationWithView(TestCase):
             template_name='local_tests/obj_list.html')
         self.assertEqual(
             sorted(response.context_data.keys()),
-            sorted(['paginator', 'page_obj', 'is_paginated', 'obj_list', 'other_list']))
+            sorted([
+                'obj_paginator', 'obj_page_obj', 'obj_is_paginated', 'obj_list',
+                'other_paginator', 'other_page_obj', 'other_is_paginated', 'other_list'
+            ]))
         self.assertEqual(
             [(o.id, type(o)) for o in response.context_data['obj_list']],
             [(o.id, type(o)) for o in MyObjectModel.objects.all()]
@@ -131,7 +137,9 @@ class TestObjectMixinIntegrationWithView(TestCase):
             template_name='local_tests/obj_detail.html')
         self.assertEqual(
             sorted(response.context_data.keys()),
-            sorted(['paginator', 'page_obj', 'is_paginated', 'obj', 'other_list']))
+            sorted(['obj',
+                'other_paginator', 'other_page_obj', 'other_is_paginated', 'other_list'
+            ]))
         self.assertEqual(
             response.context_data['obj'],
             MyObjectModel.objects.get(id=1)

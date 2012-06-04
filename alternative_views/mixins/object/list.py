@@ -92,16 +92,16 @@ class MultipleObjectMixin(ContextMixin):
             paginator, page, queryset, is_paginated = self.paginate_queryset(
                 queryset, page_size)
             context = {
-                'paginator': paginator,
-                'page_obj': page,
-                'is_paginated': is_paginated,
+                '%s_paginator' % (self.get_object_name(),): paginator,
+                '%s_page_obj' % (self.get_object_name(),): page,
+                '%s_is_paginated' % (self.get_object_name(),): is_paginated,
                 context_object_name: queryset
             }
         else:
             context = {
-                'paginator': None,
-                'page_obj': None,
-                'is_paginated': False,
+                '%s_paginator' % (self.get_object_name(),): None,
+                '%s_page_obj' % (self.get_object_name(),): None,
+                '%s_is_paginated' % (self.get_object_name(),): False,
                 context_object_name: queryset
             }
 
@@ -112,7 +112,6 @@ class MultipleObjectMixin(ContextMixin):
         ctx = self.get_context_data()
         context.update(ctx)
         return context
-
 
 
 class BaseListView(MultipleObjectMixin, View):

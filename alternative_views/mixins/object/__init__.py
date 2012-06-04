@@ -34,6 +34,8 @@ class ObjectMixin(Mixin):
         Live update the instance to make a different heritage according to the
         mode.
         """
+        # Probably another solution would be to copy the current object's dict
+        # and push it to the instanced Mixin
         super(ObjectMixin, self).as_mode(mode)
         if not mode in self.HERITAGE_PER_MODE:
             raise NotImplementedError('Unknown mode: %s' % mode)
