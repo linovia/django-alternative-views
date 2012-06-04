@@ -5,9 +5,9 @@ from django.http import HttpResponseRedirect
 
 from alternative_views.mixins import Mixin
 
-from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.list import MultipleObjectMixin
-from django.views.generic.edit import ModelFormMixin
+from .detail import SingleObjectMixin
+from .list import MultipleObjectMixin
+from .edit import ModelFormMixin
 
 
 class AlternativeSingleObjectMixin(SingleObjectMixin):
