@@ -7,57 +7,7 @@ from alternative_views.mixins import Mixin
 
 from .detail import SingleObjectMixin
 from .list import MultipleObjectMixin
-from .edit import ModelFormMixin
-
-
-class AlternativeBaseModelFormMixin(ModelFormMixin):
-    """
-    The model form mixin
-    """
-    def get_context(self, request, context, permissions, **kwargs):
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        self.form = form
-        if request.method in ('POST', 'PUT'):
-            if form.is_valid():
-                local_context = self.form_valid(form)
-            else:
-                local_context = self.form_invalid(form)
-        else:
-            local_context = self.get_context_data(form=form)
-        # Hack to work around the default generic view name
-        if 'form' in local_context:
-            local_context['%s_form' % self.get_object_name()] = local_context['form']
-            del local_context['form']
-        context.update(local_context)
-        return context
-
-    def form_invalid(self, form):
-        return self.get_context_data(form=form)
-
-    def form_valid(self, form):
-        self.object = form.save()
-        return {}
-
-
-class AlternativeNewModelFormMixin(AlternativeBaseModelFormMixin):
-    """
-    The new model mixin
-    """
-    def get_context(self, request, context, permissions, **kwargs):
-        self.object = None
-        return super(AlternativeNewModelFormMixin, self).get_context(
-            request, context, permissions, **kwargs)
-
-
-class AlternativeUpdateModelFormMixin(AlternativeBaseModelFormMixin):
-    """
-    The update model mixin
-    """
-    def get_context(self, request, context, permissions, **kwargs):
-        self.object = self.get_object()
-        return super(AlternativeUpdateModelFormMixin, self).get_context(
-            request, context, permissions, **kwargs)
+from .edit import BaseCreateView, BaseUpdateView
 
 
 class ObjectMixin(Mixin):
@@ -75,8 +25,8 @@ class ObjectMixin(Mixin):
     HERITAGE_PER_MODE = {
         'list': MultipleObjectMixin,
         'detail': SingleObjectMixin,
-        'new': AlternativeNewModelFormMixin,
-        'update': AlternativeUpdateModelFormMixin,
+        'new': BaseCreateView,
+        'update': BaseUpdateView,
     }
 
     def as_mode(self, mode):
