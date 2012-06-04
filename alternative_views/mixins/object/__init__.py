@@ -10,22 +10,6 @@ from .list import MultipleObjectMixin
 from .edit import ModelFormMixin
 
 
-# class AlternativeMultipleObjectMixin(MultipleObjectMixin):
-#     """
-#     The list mixin
-#     """
-#     def get_context_object_name(self, *args, **kwargs):
-#         return '%s_list' % self.get_object_name(*args, **kwargs)
-
-#     def get_context(self, request, context, permissions, **kwargs):
-#         ctx = self.get_context_data(object_list=self.get_queryset())
-
-#         # Sanitize the context names
-#         del ctx['object_list']
-#         context.update(ctx)
-#         return context
-
-
 class AlternativeBaseModelFormMixin(ModelFormMixin):
     """
     The model form mixin
