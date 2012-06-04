@@ -103,8 +103,6 @@ class AlternativeUpdateModelFormMixin(AlternativeBaseModelFormMixin):
 
 
 class ObjectMixin(Mixin):
-    instance_name = None
-
     model = None
     queryset = None
 
@@ -140,7 +138,7 @@ class ObjectMixin(Mixin):
         """
         Return a short name for the object.
         """
-        return self.instance_name
+        return self.context_object_name
 
     def get_template_names(self):
         """

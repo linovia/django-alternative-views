@@ -70,7 +70,8 @@ class View(object):
         # Setup the mixins
         self.mixins = copy.deepcopy(self.base_mixins)
         for name, mixin in self.mixins.iteritems():
-            mixin.instance_name = name
+            # TODO: don't push names like this !
+            mixin.context_object_name = name
             mixin.args = copy.deepcopy(args)
             mixin.kwargs = copy.deepcopy(kwargs)
             mode = mixin.mode or self.mode

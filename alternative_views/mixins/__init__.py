@@ -20,7 +20,7 @@ class BaseMixin(object):
 
 class Mixin(BaseMixin):
     mode = None
-    instance_name = None
+    context_object_name = None
     template_name = None
     response_class = TemplateResponse
 
@@ -52,7 +52,7 @@ class Mixin(BaseMixin):
         """
         permission = self.authorization(request, context)
         if permissions is not None:
-            permissions[self.instance_name] = permission
+            permissions[self.context_object_name] = permission
         if permission is True or permission is None:
             parent = super(Mixin, self)
             if hasattr(parent, 'get_context'):

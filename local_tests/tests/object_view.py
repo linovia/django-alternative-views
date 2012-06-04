@@ -34,7 +34,7 @@ class TestObjectMixin(TestCase):
 
     def test_template_names(self):
         object_mixin = MyObjectMixin(mode='list')
-        object_mixin.instance_name = 'myobjectmodel'
+        object_mixin.context_object_name = 'myobjectmodel'
         template_names = object_mixin.get_template_names()
         self.assertEqual(template_names, [
             'local_tests/myobjectmodel_list.html'
@@ -60,7 +60,7 @@ class TestObjectListMixin(TestCase):
 
     def test_context(self):
         mixin = MyObjectMixin()
-        mixin.instance_name = 'mixin_object'
+        mixin.context_object_name = 'mixin_object'
         mixin.as_mode('list')
         rf = RequestFactory()
         request = rf.get('/')
