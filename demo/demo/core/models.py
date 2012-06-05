@@ -2,7 +2,7 @@
 Models for a project
 """
 
-from django.core import models
+from django.db import models
 
 
 class Project(models.Model):
