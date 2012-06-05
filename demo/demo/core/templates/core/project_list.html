@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block menu_content %}
+<a class="brand" href="#">Demo project</a>
+<div class="nav-collapse">
+    <ul class="nav">
+        <li class="active"><a href="{% url projects %}">Projects</a></li>
+    </ul>
+</div><!--/.nav-collapse -->
+{% endblock menu_content %}
+
+
 {% block container %}
 <h1>Project list</h1>
 
@@ -11,6 +21,7 @@
     <thead>
         <tr>
             <th>Description</th>
+            <th>Header</th>
         </tr>
     </thead>
 
@@ -19,7 +30,10 @@
         {% for project in project_list %}
         <tr>
             <td>
-                {{ project.name }}
+                <a href="{% url project project.id %}">{{ project.name }}</a>
+            </td>
+            <td>
+                <a href="{% url update-project project.id %}">edit</a>
             </td>
         </tr>
         {% endfor %}

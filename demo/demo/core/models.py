@@ -22,12 +22,20 @@ class Milestone(models.Model):
         return self.name
 
 
+BUG_STATUS = (
+    ('new', 'New'),
+    ('open', 'Open'),
+    ('closed', 'Closed'),
+)
+
+
 class Bug(models.Model):
     title = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
     project = models.ForeignKey(Project, related_name='bugs')
     milestone = models.ForeignKey(Milestone, related_name='bugs',
         blank=True, null=True)
+    status = models.CharField(max_length=32, default='new')
 
     def __unicode__(self):
         return self.name

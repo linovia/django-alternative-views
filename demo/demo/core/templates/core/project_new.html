@@ -1,14 +1,3 @@
-{% extends "base.html" %}
+{% extends "core/project_form.html" %}
 
-{% block container %}
-<h1>New project</h1>
-
-<form class="well" action="" method="POST">
-    {% csrf_token %}
-    {{ project_form }}
-    <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save changes</button>
-    </div>
-</form>
-
-{% endblock container %}
+{% block title %}New project{% endblock title %}

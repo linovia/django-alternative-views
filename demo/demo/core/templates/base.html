@@ -36,19 +36,16 @@
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
+          {% block menu_content %}
           <a class="brand" href="#">Demo project</a>
           <div class="nav-collapse">
             <ul class="nav">
               <li class="active"><a href="{% url projects %}">Projects</a></li>
-              <li><a href="#about">Milestones</a></li>
-              <li><a href="#contact">Bugs</a></li>
+              <li><a href="#">Milestones</a></li>
+              <li><a href="{% url bugs project.id %}">Bugs</a></li>
             </ul>
           </div><!--/.nav-collapse -->
+          {% endblock menu_content %}
         </div>
       </div>
     </div>

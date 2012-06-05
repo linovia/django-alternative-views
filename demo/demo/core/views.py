@@ -19,7 +19,7 @@ class MilestoneMixin(ObjectMixin):
     success_url = '/milestones/'
 
     def get_queryset(self):
-        return Milestone.objects.filter(self.project)
+        return Milestone.objects.filter(project=self.project)
 
 
 class BugMixin(ObjectMixin):
@@ -44,6 +44,7 @@ class MilestoneView(ProjectView):
 
 
 class BugView(ProjectView):
+    milestones = MilestoneMixin(mode='list')
     bug = BugMixin(default_mode='detail')
 
 

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block container %}
+<h1>Bugs for project <a href="{% url project project.id %}">{{ project.name }}</a></h1>
+
+<div class="row">
+    <div class="span8">
+        <table class="table table-bordered table-striped">
+            <colgroup>
+                <col class="span1">
+                <col class="span7">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for project in project_list %}
+                <tr>
+                    <td>
+                        {{ project.name }}
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+    <div class="span4">
+        <h4>Milestones:</h4>
+        {% for milestone in milestones %}
+        <a href="#">{{ milestone.name }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+
+<a class="btn btn-primary" href="{% url new-bug project.id %}">Open a bug</a>
+
+{% endblock container %}

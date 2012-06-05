@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+
+{% block container %}
+<h1>Project: {{ project.name }}</h1>
+
+<br>
+
+<div class="row">
+    <div class="span12">Project description:</div>
+    <div class="span12">{{ project.description }}</div>
+</div>
+
+{% endblock container %}

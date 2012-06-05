@@ -3,6 +3,16 @@ from django.conf.urls import patterns, include, url
 from demo.core.views import ProjectView, BugView
 
 
+bug_urlpatterns = patterns('',
+    url(r'^$',
+        BugView.as_view(mode='list'),
+        name='bugs'),
+    url(r'^new/$',
+        BugView.as_view(mode='new'),
+        name='new-bug'),
+)
+
+
 urlpatterns = patterns('',
     url(r'^projects/$',
         ProjectView.as_view(mode='list'),
@@ -20,7 +30,5 @@ urlpatterns = patterns('',
         ProjectView.as_view(mode='delete'),
         name='delete-project'),
 
-    url(r'^projects/(?P<project_id>\d+)/bugs/$',
-        BugView.as_view(mode='list'),
-        name='bugs'),
+    (r'^projects/(?P<project_id>\d+)/bugs/',    include(bug_urlpatterns)),
 )
