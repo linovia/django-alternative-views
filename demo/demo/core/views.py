@@ -5,12 +5,15 @@ Bug tracker views.
 from alternative_views.base import View
 from alternative_views.mixins.object import ObjectMixin
 from demo.core.models import Project, Milestone, Bug
+from django.core.urlresolvers import reverse
 
 
 class ProjectMixin(ObjectMixin):
     model = Project
     pk_url_kwarg = 'project_id'
-    success_url = '/projects/'
+
+    def get_success_url(self):
+        return reverse('projects')
 
     def get_queryset(self):
         return Project.objects.filter(members=self.request.user.id)
@@ -19,7 +22,9 @@ class ProjectMixin(ObjectMixin):
 class MilestoneMixin(ObjectMixin):
     model = Milestone
     pk_url_kwarg = 'milestone_id'
-    success_url = '/milestones/'
+
+    def get_success_url(self):
+        return reverse('milestones')
 
     def get_queryset(self):
         return Milestone.objects.filter(project=self.project)
@@ -28,7 +33,9 @@ class MilestoneMixin(ObjectMixin):
 class BugMixin(ObjectMixin):
     model = Bug
     pk_url_kwarg = 'bug_id'
-    success_url = '/bugs/'
+
+    def get_success_url(self):
+        return reverse('bugs', kwargs={'project_id': self.project.id})
 
     def get_queryset(self):
         # Limits the bugs to the current project's ones
