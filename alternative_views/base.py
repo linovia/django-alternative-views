@@ -69,13 +69,15 @@ class View(object):
         self.context = {}
         # Setup the mixins
         self.mixins = copy.deepcopy(self.base_mixins)
-        for name, mixin in self.mixins.iteritems():
+        for i, (name, mixin) in enumerate(reversed(self.mixins.items())):
             # Updated the mixins variables to match what the view has
             # TODO: don't push names like this !
             mixin.context_object_name = name
             mixin.args = copy.deepcopy(args)
             mixin.kwargs = copy.deepcopy(kwargs)
-            mode = mixin.mode or self.mode
+            # Mode order: mixin's, default's (if not first), view's
+            default_mode = mixin.default_mode if i != 0 else None
+            mode = mixin.mode or default_mode or self.mode
             mixin.as_mode(mode)
 
     @classonlymethod

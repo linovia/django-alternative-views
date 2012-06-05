@@ -20,6 +20,7 @@ class BaseMixin(object):
 
 class Mixin(BaseMixin):
     mode = None
+    default_mode = None
     context_object_name = None
     template_name = None
     response_class = TemplateResponse
@@ -28,6 +29,7 @@ class Mixin(BaseMixin):
 
     def __init__(self, *args, **kwargs):
         mode = kwargs.pop('mode', None)
+        self.default_mode = kwargs.pop('default_mode', None)
         super(Mixin, self).__init__(*args, **kwargs)
         # Don't override mode if it was defined at the class level
         if not self.mode:

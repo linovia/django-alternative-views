@@ -1,5 +1,5 @@
 """
-
+Bug tracker views.
 """
 
 from alternative_views.base import View
@@ -28,6 +28,7 @@ class BugMixin(ObjectMixin):
 
     def get_queryset(self):
         # Limits the bugs to the current project's ones
+        # and possibly the milestone if we have one
         qs = Bug.objects.filter(project=self.project)
         if hasattr(self, 'milestone'):
             qs = qs.filter(milestone=self.milestone)
@@ -35,9 +36,16 @@ class BugMixin(ObjectMixin):
 
 
 class ProjectView(View):
-    project = ProjectMixin()
+    project = ProjectMixin(default_mode='detail')
+
+
+class MilestoneView(ProjectView):
+    milestone = MilestoneMixin(default_mode='detail')
 
 
 class BugView(ProjectView):
-    # Automatically inherit mixins from ProjectView
-    bug = BugMixin()
+    bug = BugMixin(default_mode='detail')
+
+
+class BugMilestoneView(MilestoneView):
+    bug = BugMixin(default_mode='detail')
