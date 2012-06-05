@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+
+{% block container %}
+<h1>Bug: {{ bug.name }}</h1>
+
+<br>
+
+<div class="row">
+    <div class="span12">Bug description:</div>
+    <div class="span12">{{ bug.description }}</div>
+</div>
+
+{% endblock container %}

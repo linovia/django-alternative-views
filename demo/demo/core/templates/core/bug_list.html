@@ -18,10 +18,10 @@
 
             <tbody>
 
-                {% for project in project_list %}
+                {% for bug in bug_list %}
                 <tr>
                     <td>
-                        {{ project.name }}
+                        <a href="{% url bug project.id bug.id %}">{{ bug.title }}</a>
                     </td>
                 </tr>
                 {% endfor %}

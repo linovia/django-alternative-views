@@ -12,6 +12,9 @@ class ProjectMixin(ObjectMixin):
     pk_url_kwarg = 'project_id'
     success_url = '/projects/'
 
+    def get_queryset(self):
+        return Project.objects.filter(members=self.request.user.id)
+
 
 class MilestoneMixin(ObjectMixin):
     model = Milestone
@@ -25,6 +28,7 @@ class MilestoneMixin(ObjectMixin):
 class BugMixin(ObjectMixin):
     model = Bug
     pk_url_kwarg = 'bug_id'
+    success_url = '/bugs/'
 
     def get_queryset(self):
         # Limits the bugs to the current project's ones

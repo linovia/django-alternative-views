@@ -9,6 +9,8 @@ class Project(models.Model):
     name = models.CharField(max_length=128)
     description = models.TextField(null=True, blank=True)
 
+    members = models.ManyToManyField('auth.User', related_name='projects')
+
     def __unicode__(self):
         return self.name
 

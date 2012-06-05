@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block container %}
+<h1>{% block title %}{% endblock %}</h1>
+
+<form class="well" action="" method="POST">
+    {% csrf_token %}
+    {{ bug_form }}
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+    </div>
+</form>
+
+{% endblock container %}
