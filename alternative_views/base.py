@@ -70,6 +70,7 @@ class View(object):
         # Setup the mixins
         self.mixins = copy.deepcopy(self.base_mixins)
         for name, mixin in self.mixins.iteritems():
+            # Updated the mixins variables to match what the view has
             # TODO: don't push names like this !
             mixin.context_object_name = name
             mixin.args = copy.deepcopy(args)
@@ -119,11 +120,12 @@ class View(object):
         # Try to dispatch to the right method; if a method doesn't exist,
         # defer to the error handler. Also defer to the error handler if the
         # request method isn't on the approved list.
-        self.context = {}
         permissions = {}
         for mixin in self.mixins.values():
+            # Push the view's args/kwargs to the mixin as well as the context
             mixin.args += args
             mixin.kwargs.update(kwargs)
+            [setattr(mixin, key, value) for key, value in self.context.iteritems()]
             self.context = mixin.get_context(
                 request, self.context, permissions=permissions, **kwargs)
             if not any(permissions.values()) and \

@@ -60,3 +60,11 @@ class TestViewResponse(TestCase):
             'context_mixin2_was_there': 'Some data',
         }
         self.assertEqual(response.context_data, expected_context)
+
+    def test_mixins_have_others_context(self):
+        view = ContentView(mode='detail')
+        rf = RequestFactory()
+        request = rf.get('/')
+        view.dispatch(request)
+        self.assertTrue(hasattr(view.mixins['context2'], 'updated_infos'))
+        self.assertEqual(view.mixins['context2'].updated_infos, True)
