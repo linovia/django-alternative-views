@@ -10,6 +10,16 @@ from demo.core.models import Project, Milestone, Bug
 class ProjectMixin(ObjectMixin):
     model = Project
     pk_url_kwarg = 'project_id'
+    success_url = '/projects/'
+
+
+class MilestoneMixin(ObjectMixin):
+    model = Milestone
+    pk_url_kwarg = 'milestone_id'
+    success_url = '/milestones/'
+
+    def get_queryset(self):
+        return Milestone.objects.filter(self.project)
 
 
 class BugMixin(ObjectMixin):
@@ -18,7 +28,10 @@ class BugMixin(ObjectMixin):
 
     def get_queryset(self):
         # Limits the bugs to the current project's ones
-        return Bug.objects.filter(self.project)
+        qs = Bug.objects.filter(project=self.project)
+        if hasattr(self, 'milestone'):
+            qs = qs.filter(milestone=self.milestone)
+        return qs
 
 
 class ProjectView(View):

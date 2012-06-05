@@ -1,1 +1,32 @@
 {% extends "base.html" %}
+
+{% block container %}
+<h1>Project list</h1>
+
+<table class="table table-bordered table-striped">
+    <colgroup>
+        <col class="span1">
+        <col class="span7">
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Description</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for project in project_list %}
+        <tr>
+            <td>
+                {{ project.name }}
+            </td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+
+<a class="btn btn-primary" href="{% url new-project %}">Add a project</a>
+
+{% endblock container %}
