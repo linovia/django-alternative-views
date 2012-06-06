@@ -45,6 +45,10 @@ Mixin has denied him that right.
 Example
 -------
 
+Feel free to give our demo project a look. Just go to the demo folder, syncdb
+and start the project. It only requires Django to be installed.
+
+
 views.py::
 
 
@@ -63,12 +67,12 @@ views.py::
 
         def get_queryset(self):
             # Limits the bugs to the current project's ones
-            return Bug.objects.filter(self.project)
+            return Bug.objects.filter(project=self.project)
 
 
     class ProjectView(View):
         contact = ContactMixin()
-        project = ProjectMixin()
+        project = ProjectMixin(default_mode='detail')
 
 
     class BugView(ProjectView):
