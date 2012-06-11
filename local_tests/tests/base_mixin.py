@@ -1,5 +1,5 @@
 """
-
+Unit tests to check the Mixin behavior
 """
 
 from alternative_views.mixins import Mixin
