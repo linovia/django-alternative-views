@@ -25,8 +25,6 @@ class Mixin(BaseMixin):
     template_name = None
     response_class = TemplateResponse
 
-    http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
-
     def __init__(self, *args, **kwargs):
         mode = kwargs.pop('mode', None)
         self.default_mode = kwargs.pop('default_mode', None)
@@ -61,6 +59,13 @@ class Mixin(BaseMixin):
                 context = parent.get_context(request, context, permissions, **kwargs)
             return context
         raise PermissionDenied()
+
+    #
+    # API to know what the mixin can serve
+    # TODO: rework this part
+    #
+
+    http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
 
     def can_process(self, request):
         """
@@ -97,3 +102,14 @@ class Mixin(BaseMixin):
             )
         else:
             return [self.template_name]
+
+
+class BoundMixin(object):
+
+    def __init__(self, view, mixin, name):
+        self.view = view
+        self.mixin = mixin
+        self.name = name
+
+    def get_context(self, request, context, permissions=None, **kwargs):
+        pass

@@ -7,7 +7,7 @@ from django.utils.decorators import classonlymethod
 from django.utils.datastructures import SortedDict
 from django import http
 
-from alternative_views.mixins import Mixin
+from alternative_views.mixins import Mixin, BoundMixin
 
 from django.utils.log import getLogger
 logger = getLogger('django.request')
@@ -63,6 +63,8 @@ class View(object):
 
     default_security = 'allow'
 
+    adapt_mixins = []   # Mixins to adapt to the view mode
+
     def __init__(self, *args, **kwargs):
         self.contributed = {}
         self.mode = kwargs.get('mode', None)
@@ -73,12 +75,18 @@ class View(object):
             # Updated the mixins variables to match what the view has
             # TODO: don't push names like this !
             mixin.context_object_name = name
-            mixin.args = copy.deepcopy(args)
-            mixin.kwargs = copy.deepcopy(kwargs)
             # Mode order: mixin's, default's (if not first), view's
             default_mode = mixin.default_mode if i != 0 else None
             mode = mixin.mode or default_mode or self.mode
             mixin.as_mode(mode)
+
+    def __getitem__(self, name):
+        "Returns a BoundMixin with the given name."
+        try:
+            mixin = self.mixins[name]
+        except KeyError:
+            raise KeyError('Key %r not found in Form' % name)
+        return mixin.bound()
 
     @classonlymethod
     def as_view(cls, **initkwargs):
@@ -125,9 +133,6 @@ class View(object):
         permissions = {}
         for mixin in self.mixins.values():
             # Push the view's args/kwargs to the mixin as well as the context
-            mixin.args += args
-            mixin.kwargs.update(kwargs)
-            [setattr(mixin, key, value) for key, value in self.context.iteritems()]
             self.context = mixin.get_context(
                 request, self.context, permissions=permissions, **kwargs)
             if not any(permissions.values()) and \
